@@ -116,7 +116,7 @@ router.post("/", (req, res) => {
                 archive: archive,
                 begin: new Date(),
                 environment: flow.environment,
-                delete_on_success: flow.delete_on_success
+                delete_on_success: flow.delete_on_success || false
             });
             tasks.forEach(function (task) {
                 task.order = ++order;
