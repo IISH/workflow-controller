@@ -1,0 +1,36 @@
+extends layout
+
+block content
+  #heartbeat(style="float:right")
+  #user User: #{user}
+  h1= title
+
+  p
+    a(href='https://confluence.socialhistoryservices.org/display/AM/Workflow+controller' target='_blank') Confluence documentation
+
+  form(method='GET' class='form-inline' id='form_workflow')
+
+    div(class='input-group')
+      label(for='form_workflow_name' class='form-check-label') Workflow types
+      select(class='custom-select' id='form_workflow_name' name='form_workflow_name' onchange='this.form.submit()')
+        each name in workflow_name
+          if name === form_workflow_name
+            option(selected='true') #{name}
+          else
+            option #{name}
+      label(for='form_workflow_status' class='form-check-label') Status
+      select(class='custom-select' id='form_workflow_status' name='form_workflow_status' onchange='this.form.submit()')
+        each name in workflow_status
+          if name === form_workflow_status
+            option(selected='true') #{name}
+          else
+            option #{name}
+  table(class='table table-striped')
+    thead(class='thead-dark')
+      tr
+        th(class='sortable' colspan='2' id='name') flow
+        th(class='sortable' id='fileset') fileset
+        th(class='sortable' id='begin') date
+        th(colspan='4') task
+    tbody(id='workflow')
+      include workflow_inc

@@ -1,0 +1,10 @@
+extends layout
+
+block content
+  h1= title
+  if sub
+    p Add your id to the whitelist to get access
+    p
+      strong #{sub}
+  p
+    a(href="/login") Login

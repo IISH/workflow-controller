@@ -1,0 +1,104 @@
+{
+  "web": {
+    "accesstoken": "12345",
+    "endpoint": "http://localhost:3000",
+    "session_secret": "93e01642900d",
+    "heartbeat": 1800000
+  },
+  "datasource": {
+    "protocol": "mongodb",
+    "host": "mongodb",
+    "port": 27017,
+    "database": "test"
+  },
+  "amq": {
+    "protocol": "http",
+    "host": "activemq",
+    "port": 8161,
+    "username": "agent",
+    "password": "7325a38d6072"
+  },
+  "openid": {
+    "client_params": {
+      "client_id": "client_id",
+      "client_secret": "client_secret",
+      "token_endpoint_auth_method": "client_secret_basic"
+    },
+    "oidc_discover_url": "http://localhost",
+    "keystore_conf": {
+      "kty": "RSA",
+      "e": "AQAB",
+      "kid": "rsa_key",
+      "alg": "RS256"
+    },
+    "keystore": {
+      "keys": [
+        {
+          "kty": "RSA",
+          "kid": "rsa_key",
+          "alg": "RS256",
+          "e": "AQAB",
+          "n": "n",
+          "d": "d-slsbqqe2OAIHW6EBQEdQ0x_9aPxTavXIqqDQY-x9_xL8nvZl5yiPex8eQu9bgXxd1f9TnLnxX3YEvqznldezZ8zWff5XNE1Q0b6GNtlVyU89qJI13ekhFREyEHkegvJWKmcVHO6VAjpSGk5vESoW3sw9K7dbPAH0r4lGdictRRqj_7AEdGhOTVZ6g8V1bgQ",
+          "p": "p-j-U1h67tjME",
+          "q": "q",
+          "dp": "dp",
+          "dq": "dq",
+          "qi": "qi"
+        }
+      ]
+    },
+    "strategy": {
+      "redirect_uri": "http://127.0.0.1:3000/openid-connect-login",
+      "scope": "openid email",
+      "response": [
+        "code"
+      ]
+    }
+  },
+  "users": {
+
+  },
+  "mailer": {
+    "host": "localhost",
+    "port": 465,
+    "secure": true,
+    "auth": {
+      "user": "mail@localhost",
+      "pass": "pass"
+    },
+    "tls": {
+      "rejectUnauthorized": false
+    }
+  },
+  "workflows": {
+    "helloworld": {
+      "mail_archivist_on_success": "archivist@localhost",
+      "tasks": [
+        {
+          "description": "Say 'hello world 1'",
+          "queue": "hello_world_1"
+        },
+        {
+          "description": "Say 'hello world 2'",
+          "queue": "hello_world_2"
+        },
+        {
+          "description": "Say 'hello world 3'",
+          "queue": "hello_world_3"
+        },
+        {
+          "description": "Say 'hello world 4'",
+          "queue": "hello_world_4"
+        },
+        {
+          "description": "Say 'hello world 5'",
+          "queue": "hello_world_5"
+        }
+      ],
+      "events": [
+        "hotfolder/helloworld"
+      ]
+    }
+  }
+}

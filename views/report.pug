@@ -1,0 +1,33 @@
+extends layout
+
+block content
+  #heartbeat(style="float:right")
+  #user User: #{user}
+  h1= title
+
+  p
+    a(href='https://confluence.socialhistoryservices.org/display/AM/Workflow+controller' target='_blank') Confluence documentation
+
+  form(method='GET' class='form-inline' id='form_report')
+
+    input(type='hidden' id='form_report_name' name='form_report_name' value=form_report_name)
+
+    div(class='input-group')
+      label(for='form_report_status' class='form-check-label') Status
+      select(class='custom-select' id='form_report_status' name='form_report_status' onchange='this.form.submit()')
+        each status in report_status
+          if status === form_report_status
+            option(selected='true') #{status}
+          else
+            option #{status}
+
+  table(class='table table-striped')
+    thead(class='thead-dark')
+      tr
+        th(class='sortable' id='accession') accession
+        th(class='sortable' id='status') status
+        th(id='aip') aip
+        th(id='dip') dip
+        th(id='iiif') iiif
+    tbody(id='report')
+      include report_inc

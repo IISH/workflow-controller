@@ -1,0 +1,44 @@
+version: "2"
+services:
+  activemq:
+    image: rmohr/activemq:5.15.9
+    restart: always
+    ports:
+      - "61616:61616"
+      - "8161:8161"
+    volumes:
+      - /data/config/activemq/conf:/opt/activemq/conf
+
+  mongodb:
+    image: mongo:4.0.12-xenial
+    ports:
+      - "27017:27017"
+    volumes:
+      - /data/config/mongodb/configdb:/data/configdb
+      - /data/config/mongodb/db:/data/db
+
+  pmq-agent-1:
+    image: registry.diginfra.net/lwo/pmq-agent:latest
+    restart: always
+    user: root
+    depends_on:
+      - "activemq"
+    volumes:
+      - /data/aip:/data/aip:ro
+      - /data/dip:/data/dip:ro
+      - /data/workflow2/Backup:/data/backup
+      - /data/workflow2/Ingest:/data/ingest
+      - /data/workflow2/Orders:/data/order
+      - /data/workflow2/.Pipeline:/data/pipeline
+      - /data/workflow2/Recovery:/data/recovery
+      - /data/workflow2/Sorting:/data/sorting
+      - /data/workflow2/.Hotfolder/iiif:/data/iiif:ro
+      - /data/helloworld:/data/helloworld:ro
+      - /data/config/pmq-agent:/opt/pmq-agent:ro
+      - /data/config/pmq-agent/ssh_config:/home/jenkins/.ssh/config:ro
+      - /data/config/pmq-agent/ssh_config:/root/.ssh/config:ro
+    environment:
+      - CONFIG_FILE=/opt/pmq-agent/application.properties
+      - MESSAGE_QUEUES=/opt/pmq-agent/queues_enabled
+      - WORKFLOW_ENDPOINT=http://workflow-controller:3000
+      - WORKFLOW_ENDPOINT_TOKEN=5bef64ce-de9e-11e9-982a-e7c54cc02556

@@ -1,0 +1,23 @@
+#!/usr/bin/env node
+const jose = require('node-jose');
+const fs = require('fs');
+const nconf = require('nconf');
+
+nconf
+    .argv()
+    .env({separator: '_', lowerCase: true})
+    .file({file: process.env.CONFIG_FILE || '../config.json'});
+
+const openid = nconf.get('openid');
+keyfile = openid.keyfile;
+keystore = jose.JWK.createKeyStore();
+
+keystore.generate("RSA", 2048, openid.keystore_conf)
+    .then(result => {
+        key = result;
+        fs.writeFileSync(keyfile, JSON.stringify({keys: [key.toJSON(true)]}));
+        console.log("Wrote a key to " + keyfile);
+    })
+    .catch(err => {
+        console.log(err);
+    });
