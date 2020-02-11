@@ -53,3 +53,8 @@ It has two tasks, each associated with a message queue or topic: 'hello_world_1'
 
 And monitors a hotfolder: '/data/helloworld'
 
+## Agent configuration
+
+For each queue in the config.json@workflows.name.tasks.queue element, there is a corresponding bash queues/queuename/startup.sh script.
+
+[Agent on github](https://github.com/IISH/workflow-pmq-agent)
