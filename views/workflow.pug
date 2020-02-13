@@ -5,10 +5,11 @@ block content
   #user User: #{user}
   h1= title
 
-  p
-    a(href='https://confluence.socialhistoryservices.org/display/AM/Workflow+controller' target='_blank') Confluence documentation
+  include menu
 
   form(method='GET' class='form-inline' id='form_workflow')
+
+    input(type='hidden' id='form_workflow_identifier' name='form_workflow_identifier' value=form_workflow_identifier)
 
     div(class='input-group')
       label(for='form_workflow_name' class='form-check-label') Workflow types

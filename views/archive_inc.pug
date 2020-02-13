@@ -2,11 +2,11 @@ each archive in archives || []
     tr
         td
           a(href='/report?form_report_name=' + archive.archive) #{archive.archive}
-        td #{archive.complete}
-        td #{archive.running}
-        td #{archive.waiting}
-        td #{archive.failed}
-        td #{archive.total}
+        td #{archive.complete||0}
+        td #{archive.running||0}
+        td #{archive.waiting||0}
+        td #{archive.failed||0}
+        td #{archive.total||0}
         td
             a(href='archive/delete/' + archive.archive class='btn btn-info delete_row' role='button') Delete report
 

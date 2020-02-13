@@ -23,6 +23,7 @@ const Map = require('collections/map');
 const map = new Map();
 
 router.get('/', function (req, res, next) {
+    let form_workflow_identifier = req.query.form_workflow_identifier;
     let form_workflow_name = req.query.form_workflow_name;
     let form_workflow_status = req.query.form_workflow_status;
     res.render('workflow', {
@@ -31,16 +32,21 @@ router.get('/', function (req, res, next) {
         workflow_name: [''].concat(Object.keys(nconf.get('workflows'))),
         workflow_status: [''].concat(['Waiting', 'Running', 'Failed', 'Complete']),
         form_workflow_name: form_workflow_name,
-        form_workflow_status: form_workflow_status
+        form_workflow_status: form_workflow_status,
+        form_workflow_identifier: form_workflow_identifier
     })
 });
 
 router.get('/workflow_inc', function (req, res, next) {
     let limit = req.params.limit || 1000;
+    let form_workflow_identifier = req.query.form_workflow_identifier;
     let form_workflow_name = req.query.form_workflow_name;
     let form_workflow_status = req.query.form_workflow_status;
     let sort = req.query.sort || 'date';
     let query = (form_workflow_name) ? {name: form_workflow_name} : {};
+    if (form_workflow_identifier) {
+        query.identifier = form_workflow_identifier;
+    }
     if (form_workflow_status) {
         switch (form_workflow_status) {
             case 'Waiting':
@@ -65,7 +71,8 @@ router.get('/workflow_inc', function (req, res, next) {
         res.render('workflow_inc', {
             workflows: workflows,
             form_workflow_name: form_workflow_name,
-            form_workflow_status: form_workflow_status
+            form_workflow_status: form_workflow_status,
+            form_workflow_identifier: form_workflow_identifier
         })
     }).sort(sort).limit(limit);
 });

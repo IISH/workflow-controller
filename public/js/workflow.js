@@ -1,11 +1,17 @@
 var sort = '';
 
 function workflow() {
+    let form_workflow_identifier = $('#form_workflow_identifier').val() || '';
     let form_workflow_name = $('#form_workflow_name').val() || '';
     let form_workflow_status = $('#form_workflow_status').val() || '';
     $.ajax({
         url: 'workflow/workflow_inc',
-        data: {'form_workflow_name': form_workflow_name, form_workflow_status: form_workflow_status, sort: sort},
+        data: {
+            'form_workflow_name': form_workflow_name,
+            form_workflow_status: form_workflow_status,
+            form_workflow_identifier: form_workflow_identifier,
+            sort: sort
+        },
         type: 'GET',
         dataType: 'html',
         success: function (data) {
@@ -37,7 +43,7 @@ function formatDate(date) {
 }
 
 function sortable() {
-    $('.sortable').click(function(){
+    $('.sortable').click(function () {
         let $this = $(this);
         let asc = $this.hasClass('asc');
         let desc = $this.hasClass('desc');
