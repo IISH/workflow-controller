@@ -5,4 +5,7 @@ each workflow in workflows || []
         td #{{'-1': 'Error', 0: 'Waiting', 1: 'Running', 2: 'Complete'}[workflow.status]}
         td #{status[workflow.has_aip]}
         td #{status[workflow.has_dip]}
+        td #{status[workflow.has_pid]}
         td #{status[workflow.has_iiif]}
+        td
+            a(href='report/delete/' + workflow.identifier class='btn btn-info delete_row' role='button') Delete

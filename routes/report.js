@@ -13,23 +13,30 @@ const nconf = require('nconf');
 const Workflow = require('../model/workflow');
 
 router.get('/', function (req, res, next) {
+    let form_workflow_name = req.query.form_workflow_name;
     let form_report_status = req.query.form_report_status;
     let form_report_name = req.query.form_report_name;
     res.render('report', {
         title: 'report',
         user: req.user.fullname,
+        workflow_name: [''].concat(Object.keys(nconf.get('workflows'))),
         report_status: [''].concat(['Error', 'Waiting', 'Running', 'Complete']),
         form_report_status: form_report_status,
-        form_report_name: form_report_name
+        form_report_name: form_report_name,
+        form_workflow_name: form_workflow_name
     })
 });
 
 router.get('/report_inc', function (req, res, next) {
     let limit = req.params.limit || 1000;
+    let form_workflow_name = req.query.form_workflow_name;
     let form_report_name = req.query.form_report_name;
     let form_report_status = req.query.form_report_status;
     let sort = req.query.sort || 'accession';
     let query = ( form_report_name ) ? {archive: form_report_name} : {};
+    if ( form_workflow_name ) {
+        query['name'] = form_workflow_name
+    }
 
     if (form_report_status) {
         switch (form_report_status) {
@@ -60,5 +67,29 @@ router.get('/report_inc', function (req, res, next) {
         })
     }).sort(sort).limit(limit);
 });
+
+router.param('identifier', function (req, res, next, identifier) {
+    res.setHeader('Content-Type', 'application/json');
+    Workflow.findOne({$or: [{'identifier': identifier}, {'tasks.identifier': identifier}]}, function (err, workflow) {
+        if (err) {
+            res.status(500);
+            res.end(JSON.stringify({status: 500, message: 'Failed to load fileset ' + identifier + ' ' + err}));
+        } else if (workflow) {
+            req.workflow = workflow;
+            next()
+        } else {
+            res.status(404);
+            res.end(JSON.stringify({status: 404, message: 'No task found with identifier ' + identifier}));
+        }
+    });
+});
+
+router.get('/delete/:identifier', function (req, res, next) {
+    let workflow = req.workflow;
+    workflow.delete();
+    let form_report_name = req.query.form_report_name;
+    res.redirect('/report?form_report_name=' + form_report_name);
+});
+
 
 module.exports = router;

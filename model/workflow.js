@@ -82,7 +82,8 @@ let workflowSchema = new dao.Schema({
     status: {type: Number, default: 0},
     has_aip: {type: Number, default: 0},
     has_dip: {type: Number, default: 0},
-    has_iiif: {type: Number, default: 0}
+    has_iiif: {type: Number, default: 0},
+    has_pid: {type: Number, default: 0}
 });
 
 /**

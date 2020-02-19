@@ -10,6 +10,7 @@
 const express = require('express');
 const router = express.Router({});
 const nconf = require('nconf');
+const fs = require('fs');
 const Workflow = require('../model/workflow');
 
 const status = {'-1': 'failed', 0: 'waiting', '1': 'running', 2: 'complete'};
@@ -28,6 +29,7 @@ router.get('/archive_inc', function (req, res, next) {
 
     let form_archive_name = req.query.form_archive_name;
     let query = (form_archive_name) ? {name: form_archive_name} : {};
+
 
     // We want a table like:
     // Archive | waiting | running | completed | failed | total
@@ -64,9 +66,69 @@ router.param('archive', function (req, res, next, archive) {
     next()
 });
 
+router.param('accession_id', function (req, res, next, accession_id) {
+    let query = {accession: accession_id};
+    Workflow.findOne(query, function (err, workflow) {
+        if (err) {
+            res.status(500);
+            res.end(JSON.stringify({status: 500, message: 'Failed to load fileset ' + identifier + ' ' + err}));
+        } else if (workflow) {
+            req.workflow = workflow;
+            next()
+        } else {
+            res.status(404);
+            res.end(JSON.stringify({status: 404, message: 'No task found with identifier ' + identifier}));
+        }
+    });
+});
+
+router.get('/check/:archive', function (req, res, next) {
+    let archive = req.archive;
+    let query = {archive: archive};
+
+    const workflows = nconf.get('workflows');
+    const hotfolder = workflows['check'].events[0];
+    let source_file = hotfolder + '/.' + archive + '.txt';
+    let target_file = hotfolder + '/' + archive + '.txt';
+    let writeStream = fs.createWriteStream(source_file, {
+        flags: 'a' // 'a' means appending (old data will be preserved
+    });
+
+    Workflow.find(query).stream()
+        .on('error', function (err) {
+            if (err) console.log('Error Workflow.find: ' + err);
+            return next(err);
+        })
+        .on('data', function (workflow) {
+            writeStream.write(workflow.accession);
+            writeStream.write("\n");
+        })
+        .on('close', function () {
+            // the stream is closed
+            writeStream.end();
+            fs.rename(source_file, target_file, function (err) {
+                if (err) console.log('Error fs.rename: ' + err);
+            });
+            console.log('File added: ' + target_file);
+        });
+    res.redirect('/report');
+});
+
+router.post('/check/:accession_id', function (req, res) {
+    let workflow = req.workflow;
+    let task_agent = req.body;
+    workflow.has_aip = task_agent.has_aip || workflow.has_aip;
+    workflow.has_dip = task_agent.has_dip || workflow.has_aip;
+    workflow.has_iiif = task_agent.has_iiif || workflow.has_aip;
+    workflow.has_pid = task_agent.has_pid || workflow.has_aip;
+    workflow.save();
+    res.status(200);
+    res.end(JSON.stringify({status: 200, message: 'OK'}));
+});
+
 router.get('/delete/:archive', function (req, res, next) {
     let archive = req.archive;
-    Workflow.deleteMany({archive:archive}, function(err, rowsToDelete) {
+    Workflow.deleteMany({archive: archive}, function (err, rowsToDelete) {
         if (err) {
             console.error(err);
         } else {

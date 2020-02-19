@@ -20,13 +20,23 @@ block content
           else
             option #{status}
 
+      label(for='form_workflow_name' class='form-check-label') Workflow types
+        select(class='custom-select' id='form_workflow_name' name='form_workflow_name' onchange='this.form.submit()')
+          each name in workflow_name
+            if name === form_workflow_name
+              option(selected='true') #{name}
+            else
+              option #{name}
+
   table(class='table table-striped')
     thead(class='thead-dark')
       tr
         th(class='sortable' id='accession') accession
         th(class='sortable' id='status') status
-        th(id='aip') aip
-        th(id='dip') dip
-        th(id='iiif') iiif
+        th(class='sortable' id='aip') aip
+        th(class='sortable' id='dip') dip
+        th(class='sortable' id='pid') pid
+        th(class='sortable' id='iiif') iiif
+        th(id='delete') delete
     tbody(id='report')
       include report_inc

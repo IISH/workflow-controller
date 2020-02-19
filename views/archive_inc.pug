@@ -8,5 +8,7 @@ each archive in archives || []
         td #{archive.failed||0}
         td #{archive.total||0}
         td
+            a(href='archive/check/' + archive.archive class='btn btn-info' role='button') Check 
+        td
             a(href='archive/delete/' + archive.archive class='btn btn-info delete_row' role='button') Delete report
 

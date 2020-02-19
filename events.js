@@ -56,7 +56,12 @@ for (let workflow in workflows) {
                                     console.warn(err);
                                 }
                             }
-                        )
+                        );
+                    fs.unlink(filename, function (err) {
+                        if (err) {
+                            console.log(err);
+                        }
+                    });
                 }
             });
     }

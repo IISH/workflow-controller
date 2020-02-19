@@ -3,9 +3,10 @@ var sort = '';
 function report() {
     let form_report_status = $('#form_report_status').val() || '';
     let form_report_name = $('#form_report_name').val() || '';
+    let form_workflow_name = $('#form_workflow_name').val() || '';
     $.ajax({
         url: 'report/report_inc',
-        data: {form_report_status: form_report_status, form_report_name: form_report_name, sort: sort},
+        data: {form_workflow_name: form_workflow_name, form_report_status: form_report_status, form_report_name: form_report_name, sort: sort},
         type: 'GET',
         dataType: 'html',
         success: function (data) {
