@@ -118,13 +118,30 @@ router.post('/check/:accession_id', function (req, res) {
     let workflow = req.workflow;
     let task_agent = req.body;
     workflow.has_aip = task_agent.has_aip || workflow.has_aip;
-    workflow.has_dip = task_agent.has_dip || workflow.has_aip;
-    workflow.has_iiif = task_agent.has_iiif || workflow.has_aip;
-    workflow.has_pid = task_agent.has_pid || workflow.has_aip;
+    workflow.has_dip = task_agent.has_dip || workflow.has_dip;
+    workflow.has_pid = task_agent.has_pid || workflow.has_pid;
+    workflow.has_iiif = task_agent.has_iiif || workflow.has_iiif;
+    workflow.status = (
+        workflow.status(workflow.has_aip) &&
+        workflow.status(workflow.has_dip) &&
+        workflow.status(workflow.has_pid) &&
+        workflow.status(workflow.has_iiif)) ? 2: -1;
     workflow.save();
     res.status(200);
     res.end(JSON.stringify({status: 200, message: 'OK'}));
 });
+
+function status(i) {
+    switch (i) {
+        case -1:
+        case 0:
+            return false;
+        case 1:
+            return true;
+        default:
+            return false;
+    }
+}
 
 router.get('/delete/:archive', function (req, res, next) {
     let archive = req.archive;

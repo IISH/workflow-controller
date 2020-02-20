@@ -61,6 +61,7 @@ for (let workflow in workflows) {
                         if (err) {
                             console.log(err);
                         }
+                        console.log('File removed: ' + filename);
                     });
                 }
             });
