@@ -122,16 +122,16 @@ router.post('/check/:accession_id', function (req, res) {
     workflow.has_pid = task_agent.has_pid || workflow.has_pid;
     workflow.has_iiif = task_agent.has_iiif || workflow.has_iiif;
     workflow.status = (
-        workflow.status(workflow.has_aip) &&
-        workflow.status(workflow.has_dip) &&
-        workflow.status(workflow.has_pid) &&
-        workflow.status(workflow.has_iiif)) ? 2: -1;
+        check(workflow.has_aip) &&
+        check(workflow.has_dip) &&
+        check(workflow.has_pid) &&
+        check(workflow.has_iiif)) ? 2: -1;
     workflow.save();
     res.status(200);
     res.end(JSON.stringify({status: 200, message: 'OK'}));
 });
 
-function status(i) {
+function check(i) {
     switch (i) {
         case -1:
         case 0:
