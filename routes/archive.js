@@ -107,10 +107,10 @@ router.post('/check/:accession_id', function (req, res) {
     let query = req.query;
     let task_agent = req.body;
     let update = {};
-    let has_aip = typeof parseInt(task_agent.has_aip);
-    let has_dip = typeof parseInt(task_agent.has_dip);
-    let has_pid = typeof parseInt(task_agent.has_pid);
-    let has_iiif = typeof parseInt(task_agent.has_iiif);
+    let has_aip = Number(task_agent.has_aip);
+    let has_dip = Number(task_agent.has_dip);
+    let has_pid = Number(task_agent.has_pid);
+    let has_iiif = Number(task_agent.has_iiif);
     update['has_aip'] = has_aip;
     update['has_dip'] = has_dip;
     update['has_pid'] = has_pid;
