@@ -8,7 +8,9 @@ each workflow in workflows || []
         td #{status[workflow.has_pid]}
         td
           if workflow.has_iiif === 1
-            a(target='_blank' href='https://access.iisg.amsterdam/universalviewer/#?manifest=https://hdl.handle.net/10622/' + workflow.accession + '?locatt=view:manifest') #{status[workflow.has_iiif]}
+            #{status[workflow.has_iiif]}
+            a(target='_blank' href='https://access.iisg.amsterdam/universalviewer/#?manifest=https://hdl.handle.net/10622/' + workflow.accession + '?locatt=view:manifest') | iiif
+            a(target='_blank' href='https://hdl.handle.net/10622/' + workflow.accession + '?locatt=view:catalog') | catalog
           else
             #{status[workflow.has_iiif]}
         td
