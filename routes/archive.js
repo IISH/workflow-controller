@@ -121,9 +121,10 @@ router.post('/check/:accession_id', function (req, res) {
     res.end(JSON.stringify({status: 200, message: 'OK'}));
 });
 
-function _update(query, update) {
-    const res = Workflow.updateMany(query, {$set:update});
-    console.log(res);
+async function _update(query, update) {
+    console.log(query);
+    console.log(update);
+    await Workflow.updateMany(query, {$set: update});
 }
 
 function check(i) {
