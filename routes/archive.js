@@ -107,15 +107,20 @@ router.post('/check/:accession_id', function (req, res) {
     let query = req.query;
     let task_agent = req.body;
     let update = {};
-    update['has_aip'] = task_agent.has_aip;
-    update['has_dip'] = task_agent.has_dip;
-    update['has_pid'] = task_agent.has_pid;
-    update['has_iiif'] = task_agent.has_iiif;
+    let has_aip = typeof parseInt(task_agent.has_aip);
+    let has_dip = typeof parseInt(task_agent.has_dip);
+    let has_pid = typeof parseInt(task_agent.has_pid);
+    let has_iiif = typeof parseInt(task_agent.has_iiif);
+    update['has_aip'] = has_aip;
+    update['has_dip'] = has_dip;
+    update['has_pid'] = has_pid;
+    update['has_iiif'] = has_iiif;
     update['status'] = (
-        check(task_agent.has_aip) &&
-        check(task_agent.has_dip) &&
-        check(task_agent.has_pid) &&
-        check(task_agent.has_iiif)) ? 2: -1;
+        check(has_aip) &&
+        check(has_dip) &&
+        check(has_pid) &&
+        check(has_iiif)) ? 2: -1;
+    console.log('query: ' + query + ' update: ' + update);
     Workflow.updateMany(query, update);
     res.status(200);
     res.end(JSON.stringify({status: 200, message: 'OK'}));
