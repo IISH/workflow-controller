@@ -67,19 +67,7 @@ router.param('archive', function (req, res, next, archive) {
 });
 
 router.param('accession_id', function (req, res, next, accession_id) {
-    let query = {accession: accession_id};
-    Workflow.findOne(query, function (err, workflow) {
-        if (err) {
-            res.status(500);
-            res.end(JSON.stringify({status: 500, message: 'Failed to load fileset ' + identifier + ' ' + err}));
-        } else if (workflow) {
-            req.workflow = workflow;
-            next()
-        } else {
-            res.status(404);
-            res.end(JSON.stringify({status: 404, message: 'No task found with identifier ' + identifier}));
-        }
-    });
+    req.query = {accession: accession_id};
 });
 
 router.get('/check/:archive', function (req, res, next) {
@@ -115,18 +103,19 @@ router.get('/check/:archive', function (req, res, next) {
 });
 
 router.post('/check/:accession_id', function (req, res) {
-    let workflow = req.workflow;
+    let query = req.query;
     let task_agent = req.body;
-    workflow.has_aip = task_agent.has_aip || workflow.has_aip;
-    workflow.has_dip = task_agent.has_dip || workflow.has_dip;
-    workflow.has_pid = task_agent.has_pid || workflow.has_pid;
-    workflow.has_iiif = task_agent.has_iiif || workflow.has_iiif;
-    workflow.status = (
-        check(workflow.has_aip) &&
-        check(workflow.has_dip) &&
-        check(workflow.has_pid) &&
-        check(workflow.has_iiif)) ? 2: -1;
-    workflow.save();
+    let update = {};
+    update['has_aip'] = task_agent.has_aip;
+    update['has_dip'] = task_agent.has_dip;
+    update['has_pid'] = task_agent.has_pid;
+    update['has_iiif'] = task_agent.has_iiif;
+    update['status'] = (
+        check(task_agent.has_aip) &&
+        check(task_agent.has_dip) &&
+        check(task_agent.has_pid) &&
+        check(task_agent.has_iiif)) ? 2: -1;
+    Workflow.updateMany(query, update);
     res.status(200);
     res.end(JSON.stringify({status: 200, message: 'OK'}));
 });
