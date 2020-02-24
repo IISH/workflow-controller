@@ -68,6 +68,7 @@ router.param('archive', function (req, res, next, archive) {
 
 router.param('accession_id', function (req, res, next, accession_id) {
     req.query = {accession: accession_id};
+    next()
 });
 
 router.get('/check/:archive', function (req, res, next) {
