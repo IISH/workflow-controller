@@ -207,7 +207,7 @@ function status(workflow) {
             send_message(workflow);
             break;
         case 200:
-            if (minutes_begin > ONE_HOUR) {
+            if (minutes_begin > 6 * ONE_HOUR) {
                 console.log("Queued task takes a bit longer than expected. Is the agent offline or busy? Task: " + workflow.task.queue);
                 workflow.task.info = 'overdue (' + minutes_begin + 'm)';
                 workflow.task.status = 250;
