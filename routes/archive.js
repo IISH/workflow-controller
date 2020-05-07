@@ -10,8 +10,8 @@
 const express = require('express');
 const router = express.Router({});
 const nconf = require('nconf');
-const fs = require('fs');
 const Workflow = require('../model/workflow');
+const amq = require('../amq');
 
 const status = {'-1': 'failed', 0: 'waiting', '1': 'running', 2: 'complete'};
 
@@ -74,32 +74,28 @@ router.param('accession_id', function (req, res, next, accession_id) {
 router.get('/check/:archive', function (req, res, next) {
     let archive = req.archive;
     let query = {archive: archive};
-
-    const workflows = nconf.get('workflows');
-    const hotfolder = workflows['check'].events[0];
-    let source_file = hotfolder + '/.' + archive + '.txt';
-    let target_file = hotfolder + '/' + archive + '.txt';
-    let writeStream = fs.createWriteStream(source_file, {
-        flags: 'a' // 'a' means appending (old data will be preserved
-    });
+    const queue = 'archivematica_80_check';
 
     Workflow.find(query).stream()
         .on('error', function (err) {
             if (err) console.log('Error Workflow.find: ' + err);
             return next(err);
         })
-        .on('data', function (workflow) {
-            writeStream.write(workflow.accession);
-            writeStream.write("\n");
+        .on('data', function (_workflow) {
+            let workflow = Workflow(_workflow);
+            workflow.isNew = false;
+            let task = workflow.tasks.find(_task => _task.queue === queue);
+            if ( task ) {
+                task.info = 'Retrying...';
+                workflow.tasks = workflow.tasks.filter(function (_task) {
+                    return (_task.identifier !== task.identifier);
+                });
+                workflow.tasks.unshift(task);
+                amq(workflow);
+            } else {
+                console.log('Warn: no task with queue ' + queue + ' found in ' + workflow.identifier);
+            }
         })
-        .on('close', function () {
-            // the stream is closed
-            writeStream.end();
-            fs.rename(source_file, target_file, function (err) {
-                if (err) console.log('Error fs.rename: ' + err);
-            });
-            console.log('File added: ' + target_file);
-        });
     res.redirect('/report');
 });
 

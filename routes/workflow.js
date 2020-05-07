@@ -11,13 +11,12 @@ const express = require('express');
 const router = express.Router({});
 const nconf = require('nconf');
 const Workflow = require('../model/workflow');
-const request = require('request');
 const nodemailer = require('nodemailer');
 const path = require('path');
+const amq = require('../amq');
 
 const ONE_MINUTE = 60 * 1000;
 const ONE_HOUR = 60 * ONE_MINUTE;
-const ONE_DAY = 24 * ONE_HOUR;
 
 const Map = require('collections/map');
 const map = new Map();
@@ -129,7 +128,7 @@ router.post("/", (req, res) => {
                 task.order = ++order;
                 workflow.tasks.push(task);
             });
-            send_message(workflow);
+            amq(workflow);
             res.status(200);
             res.end(JSON.stringify({status: 200, message: workflow}));
         } else {
@@ -166,7 +165,7 @@ router.get('/retry/:identifier', function (req, res, next) {
     });
     workflow.tasks.unshift(task);
     workflow.task.info = 'Retrying...';
-    send_message(workflow);
+    amq(workflow);
 
     let form_workflow_name = parse(req.query.form_workflow_name);
     res.redirect('/workflow?form_workflow_name=' + form_workflow_name);
@@ -204,7 +203,7 @@ function status(workflow) {
         case 100:
         case 150:
             console.log("Task start " + workflow.task.queue);
-            send_message(workflow);
+            amq(workflow);
             break;
         case 200:
             if (minutes_begin > 6 * ONE_HOUR) {
@@ -216,12 +215,12 @@ function status(workflow) {
             break;
         case 250:
             console.log("Resent message");
-            send_message(workflow);
+            amq(workflow);
             break;
         case 300:
             if (minutes_end > ONE_HOUR) { // For one hour no response yet?
                 console.log("No response from agent. Is the agent offline or busy? Task: " + workflow.task.queue);
-                send_message(workflow);
+                amq(workflow);
             } else {
                 workflow.status = 1;
                 save(workflow);
@@ -237,9 +236,9 @@ function status(workflow) {
             save(workflow);
             break;
         case 499:
-            if (workflow.task.retry && minutes_end > ONE_DAY) { // For one day no response yet
+            if (workflow.task.retry && minutes_end > ONE_HOUR) { // For one day no response yet
                 console.log("No response from agent. Is the agent offline or busy? Task: " + workflow.task.queue);
-                send_message(workflow);
+                amq(workflow);
             }
             break;
         case 500:
@@ -302,28 +301,6 @@ router.post('/queue/:identifier', function (req, res) {
         res.end(JSON.stringify({status: 404, message: 'No such task for workflow ' + workflow}));
     }
 });
-
-function send_message(workflow) {
-    let amq = nconf.get('amq');
-    let url = amq.protocol + '://' + amq.host + ':' + amq.port + '/api/message/' + workflow.task.queue + '?type=' + workflow.task.type;
-    workflow.task.identifier = Workflow.identifier();
-    save(workflow);
-    let form = {body: workflow.task.identifier};
-    request.post({url: url, form: form},
-        function (error, response, body) {
-            if (!error && response.statusCode === 200) {
-                console.log(body);
-                workflow.task.info = 'send to queue';
-                workflow.task.begin = new Date();
-                workflow.task.status = 200;
-            } else {
-                console.error(body);
-                workflow.task.info = body;
-                workflow.task.status = 150;
-            }
-        }
-    ).auth(amq.username, amq.password, false);
-}
 
 function new_message(key) {
     let now = new Date();

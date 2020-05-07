@@ -31,12 +31,13 @@ block content
   table(class='table table-striped')
     thead(class='thead-dark')
       tr
+        th sample
         th(class='sortable' id='accession') accession
         th(class='sortable' id='status') status
-        th(class='sortable' id='aip') aip
-        th(class='sortable' id='dip') dip
-        th(class='sortable' id='pid') pid
-        th(class='sortable' id='iiif') iiif
+        th(class='sortable' id='has_aip') aip
+        th(class='sortable' id='has_dip') dip
+        th(class='sortable' id='has_pid') pid
+        th(class='sortable' id='has_iiif') iiif
         th(id='delete') delete
     tbody(id='report')
       include report_inc

@@ -1,4 +1,4 @@
-FROM node:11.12.0-alpine
+FROM node:alpine3.11
 LABEL Description="Workflow controller" Version="1.0.8"
 
 COPY . /home/node
