@@ -195,10 +195,10 @@ function status(workflow) {
     workflow.isNew = false;
     let now = new Date();
 
-    let minutes_begin = Math.floor(Math.abs((now - workflow.task.begin) / ONE_MINUTE)); // The difference between now and the last call from the agent.
-    let minutes_end = Math.floor(Math.abs((now - workflow.task.end) / ONE_MINUTE)); // The difference between now and the last call from the agent.
+    let seconds_begin = Math.floor((now - workflow.task.begin) ); // The difference between now and the last call from the agent.
+    let seconds_end = Math.floor((now - workflow.task.end) ); // The difference between now and the last call from the agent.
 
-    console.log("Workflow status " + workflow.fileset + ':' + workflow.task.queue + ':' + workflow.task.status);
+    console.log("Workflow status " + workflow.fileset + ':' + workflow.task.queue + ':' + workflow.task.status + ':' + workflow.task.retry + ':' + seconds_begin + ':' + seconds_end);
     switch (workflow.task.status) {
         case 100:
         case 150:
@@ -206,9 +206,9 @@ function status(workflow) {
             amq(workflow);
             break;
         case 200:
-            if (minutes_begin > 6 * ONE_HOUR) {
+            if (seconds_begin > 6 * ONE_HOUR) {
                 console.log("Queued task takes a bit longer than expected. Is the agent offline or busy? Task: " + workflow.task.queue);
-                workflow.task.info = 'overdue (' + minutes_begin + 'm)';
+                workflow.task.info = 'overdue (' + seconds_begin + 'm)';
                 workflow.task.status = 250;
                 save(workflow);
             }
@@ -218,7 +218,7 @@ function status(workflow) {
             amq(workflow);
             break;
         case 300:
-            if (minutes_end > ONE_HOUR) { // For one hour no response yet?
+            if (seconds_end > ONE_HOUR) { // For one hour no response yet?
                 console.log("No response from agent. Is the agent offline or busy? Task: " + workflow.task.queue);
                 amq(workflow);
             } else {
@@ -236,7 +236,7 @@ function status(workflow) {
             save(workflow);
             break;
         case 499:
-            if (workflow.task.retry && minutes_end > ONE_HOUR) { // For one day no response yet
+            if (workflow.task.retry && seconds_end > ONE_HOUR) { // For hour no response yet
                 console.log("No response from agent. Is the agent offline or busy? Task: " + workflow.task.queue);
                 amq(workflow);
             }
@@ -291,7 +291,7 @@ router.post('/queue/:identifier', function (req, res) {
     let task_agent = req.body;
     if (workflow.task.queue === task_agent.queue) {
         workflow.task.status = task_agent.status;
-        workflow.task.end = Date(task_agent.date);
+        workflow.task.end = new Date();
         workflow.task.info = task_agent.info;
         status(workflow);
         res.status(200);
