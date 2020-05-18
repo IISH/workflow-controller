@@ -121,6 +121,7 @@ router.post("/", (req, res) => {
                 accession: accession,
                 archive: archive,
                 begin: new Date(),
+                retry: retry,
                 environment: flow.environment,
                 delete_on_success: flow.delete_on_success || false
             });
@@ -236,7 +237,7 @@ function status(workflow) {
             save(workflow);
             break;
         case 499:
-            if (workflow.task.retry && seconds_end > ONE_HOUR) { // For hour no response yet
+            if (workflow.task.retry && seconds_end > workflow.task.retry ) { // For hour no response yet
                 console.log("No response from agent. Is the agent offline or busy? Task: " + workflow.task.queue);
                 amq(workflow);
             }
@@ -255,9 +256,10 @@ function status(workflow) {
                 workflow.status = 2; // this will move the document to another collection.
                 send_mail(workflow, 'Success', false);
                 save(workflow);
-                return;
+                status(workflow);
             }
             if (workflow.complete && workflow.delete_on_success) {
+                console.log("Delete workflow " + workflow.task.queue);
                 workflow.delete();
             }
             break;

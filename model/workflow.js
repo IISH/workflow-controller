@@ -35,6 +35,9 @@
 const dao = require('./dao');
 const uuidv4 = require('uuid/v4');
 
+const ONE_MINUTE = 60 * 1000;
+const ONE_HOUR = 60 * ONE_MINUTE;
+
 /**
  * Task is a child of Workflow
  * @type {dao.Schema}
@@ -49,7 +52,7 @@ let taskSchema = new dao.Schema({
     info: {type: String, default: 'Waiting its turn'},
     description: String,
     order: Number,
-    retry: {type: Boolean, default: true}
+    retry: {type: Number, default: ONE_HOUR}
 }, { _id: false });
 
 /**

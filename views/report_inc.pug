@@ -2,7 +2,7 @@ each workflow in workflows || []
     tr
         td
           a(target='_blank' href='https://access.iisg.amsterdam/universalviewer/#?manifest=https://hdl.handle.net/10622/' + workflow.accession + '?locatt=view:manifest')
-            img(style='height: 100px;width: 100px' src='https://hdl.handle.net/10622/' + workflow.accession + '?locatt=view:level3')
+            img(style='height: 100px;width: 100px' src='https://access.iisg.amsterdam/file/' + workflow.accession)
         td
           a(href='/workflow?form_workflow_identifier=' + workflow.identifier) #{workflow.accession}
         td #{{'-1': 'Error', 0: 'Waiting', 1: 'Running', 2: 'Complete'}[workflow.status]}
@@ -10,11 +10,8 @@ each workflow in workflows || []
         td #{status[workflow.has_dip]}
         td #{status[workflow.has_pid]}
         td
-          if workflow.has_iiif === 1
-            #{status[workflow.has_iiif]}
-              a(target='_blank' href='https://access.iisg.amsterdam/universalviewer/#?manifest=https://hdl.handle.net/10622/' + workflow.accession + '?locatt=view:manifest') | iiif
-              a(target='_blank' href='https://hdl.handle.net/10622/' + workflow.accession + '?locatt=view:catalog') | catalog
-          else
-            #{status[workflow.has_iiif]}
+          #{status[workflow.has_iiif]} |
+          a(target='_blank' href='https://access.iisg.amsterdam/universalviewer/#?manifest=https://hdl.handle.net/10622/' + workflow.accession + '?locatt=view:manifest') iiif
+          a(target='_blank' href='https://hdl.handle.net/10622/' + workflow.accession + '?locatt=view:catalog') catalog
         td
             a(href='report/delete/' + workflow.identifier class='btn btn-info delete_row' role='button') Delete
