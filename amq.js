@@ -11,7 +11,6 @@ module.exports = function(workflow) {
     let amq = nconf.get('amq');
     let url = amq.protocol + '://' + amq.host + ':' + amq.port + '/api/message/' + workflow.task.queue + '?type=' + workflow.task.type;
     workflow.task.identifier = Workflow.identifier();
-    save(workflow); // save before sent, so we ensure the identifier can be found.
     let form = {body: workflow.task.identifier};
     request.post({url: url, form: form},
         function (error, response, body) {
@@ -27,6 +26,6 @@ module.exports = function(workflow) {
             }
         }
     ).auth(amq.username, amq.password, false);
-    save(workflow); // save again
+    save(workflow);
 }
 

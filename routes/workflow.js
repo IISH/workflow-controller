@@ -256,7 +256,6 @@ function status(workflow) {
                 workflow.status = 2; // this will move the document to another collection.
                 send_mail(workflow, 'Success', false);
                 save(workflow);
-                status(workflow);
             }
             if (workflow.complete && workflow.delete_on_success) {
                 console.log("Delete workflow " + workflow.task.queue);
