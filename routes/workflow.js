@@ -223,8 +223,10 @@ function status(workflow) {
                 console.log("No response from agent. Is the agent offline or busy? Task: " + workflow.task.queue);
                 amq(workflow);
             } else {
-                workflow.status = 1;
-                save(workflow);
+                if ( workflow.status !== 1) {
+                    workflow.status = 1;
+                    save(workflow);
+                }
             }
             break;
         case 400:
