@@ -18,7 +18,7 @@ const status = {'-1': 'failed', 0: 'waiting', '1': 'running', 2: 'complete'};
 router.get('/', function (req, res, next) {
     let form_archive_name = req.query.form_archive_name;
     res.render('archive', {
-        title: 'archive',
+        title: 'archive', theme: nconf.get('web').theme,
         workflow_name: [''].concat(Object.keys(nconf.get('workflows'))),
         form_archive_name: form_archive_name,
         user: req.user.fullname

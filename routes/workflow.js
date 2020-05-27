@@ -26,7 +26,7 @@ router.get('/', function (req, res, next) {
     let form_workflow_name = req.query.form_workflow_name;
     let form_workflow_status = req.query.form_workflow_status;
     res.render('workflow', {
-        title: 'workflow',
+        title: 'workflow', theme: nconf.get('web').theme,
         user: req.user.fullname,
         workflow_name: [''].concat(Object.keys(nconf.get('workflows'))),
         workflow_status: [''].concat(['Waiting', 'Running', 'Failed', 'Complete']),
@@ -121,7 +121,6 @@ router.post("/", (req, res) => {
                 accession: accession,
                 archive: archive,
                 begin: new Date(),
-                retry: retry,
                 environment: flow.environment,
                 delete_on_success: flow.delete_on_success || false
             });

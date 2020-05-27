@@ -24,3 +24,7 @@ th.sortable.desc::after {
 th.sortable:hover::after {
     color: #ffffff;
 }
+
+body {
+    background-color: #ffffff;
+}

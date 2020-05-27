@@ -17,7 +17,7 @@ router.get('/', function (req, res, next) {
     let form_report_status = req.query.form_report_status;
     let form_report_name = req.query.form_report_name;
     res.render('report', {
-        title: 'report',
+        title: 'report', theme: nconf.get('web').theme,
         user: req.user.fullname,
         workflow_name: [''].concat(Object.keys(nconf.get('workflows'))),
         report_status: [''].concat(['Error', 'Waiting', 'Running', 'Complete']),

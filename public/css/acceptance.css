@@ -1,0 +1,30 @@
+/* Table sort indicators */
+
+th.sortable {
+    position: relative;
+    cursor: pointer;
+}
+
+th.sortable::after {
+    font-family: FontAwesome, serif;
+    content: "\f0dc";
+    position: absolute;
+    right: 8px;
+    color: #999;
+}
+
+th.sortable.asc::after {
+    content: "\f0d8";
+}
+
+th.sortable.desc::after {
+    content: "\f0d7";
+}
+
+th.sortable:hover::after {
+    color: #ffffff;
+}
+
+body {
+    background-color: #ffffcc;
+}

@@ -3,7 +3,7 @@
     "accesstoken": "12345",
     "endpoint": "http://localhost:3000",
     "session_secret": "93e01642900d",
-    "heartbeat": 1800000
+    "heartbeat": 1800000,
   },
   "datasource": {
     "protocol": "mongodb",
