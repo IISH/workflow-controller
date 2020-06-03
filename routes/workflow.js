@@ -218,15 +218,15 @@ function status(workflow) {
             amq(workflow);
             break;
         case 300:
-            if (seconds_end > ONE_HOUR) { // For one hour no response yet?
-                console.log("No response from agent. Is the agent offline or busy? Task: " + workflow.task.queue);
-                amq(workflow);
-            } else {
-                if ( workflow.status !== 1) {
-                    workflow.status = 1;
-                    save(workflow);
-                }
-            }
+            // if (seconds_end > ONE_HOUR) { // For one hour no response yet?
+            //     console.log("No response from agent. Is the agent offline or busy? Task: " + workflow.task.queue);
+            //     amq(workflow);
+            // } else {
+            //     if ( workflow.status !== 1) {
+            //         workflow.status = 1;
+            //         save(workflow);
+            //     }
+            // }
             break;
         case 400:
         case 450:
