@@ -121,11 +121,14 @@ router.post("/", (req, res) => {
                 accession: accession,
                 archive: archive,
                 begin: new Date(),
+                end: new Date(),
                 environment: flow.environment,
                 delete_on_success: flow.delete_on_success || false
             });
             tasks.forEach(function (task) {
                 task.order = ++order;
+                task.begin = new Date();
+                task.end = new Date();
                 workflow.tasks.push(task);
             });
             amq(workflow);
@@ -231,6 +234,13 @@ function status(workflow) {
             //         save(workflow);
             //     }
             // }
+            break;
+        case 350:
+            workflow.status = 1;
+            save(workflow);
+            break;
+        case 360:
+            save(workflow);
             break;
         case 400:
         case 450:

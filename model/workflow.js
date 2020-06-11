@@ -44,8 +44,8 @@ const ONE_HOUR = 60 * ONE_MINUTE;
  */
 let taskSchema = new dao.Schema({
     identifier: String,
-    begin: {type: Date, default: new Date()},
-    end: {type: Date, default: new Date()},
+    begin: Date,
+    end: Date,
     queue: String,
     type: {type: String, default: 'queue'},
     status: {type: Number, default: 100},
@@ -78,8 +78,8 @@ let workflowSchema = new dao.Schema({
     fileset: {type: String, index: {unique: true, dropDups: true}},
     accession: {type: String, index: {unique: false, dropDups: false}},
     archive: {type: String, index: {unique: false, dropDups: false}},
-    begin: {type: Date, default: new Date()},
-    end: {type: Date, default: new Date()},
+    begin: Date,
+    end: Date,
     delete_on_success: {type: Boolean, default: true},
     tasks: [taskSchema],
     status: {type: Number, default: 0},
