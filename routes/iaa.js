@@ -68,20 +68,20 @@ module.exports = function (app, passport, web) {
 
     app.get('/logout', function (req, res) {
         req.logout();
-        res.render('logout', {title: 'Logout', theme: nconf.get('web').theme});
+        res.render('logout', {title: 'Logout', theme: web.theme});
     });
 
     app.get('/failed', function (req, res) {
         req.logout();
         res.status = 401;
-        res.render('logout', {title: 'Unknown user or password', theme: nconf.get('web').theme});
+        res.render('logout', {title: 'Unknown user or password', theme: web.theme});
     });
 
     app.get('/denied', function (req, res) {
         let sub = req.user.sub;
         req.logout();
         res.status = 403;
-        res.render('logout', {title: 'Access denied. Insufficient permissions', theme: nconf.get('web').theme, sub: sub});
+        res.render('logout', {title: 'Access denied. Insufficient permissions', theme: web.theme, sub: sub});
     });
 
 };
