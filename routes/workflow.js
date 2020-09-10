@@ -46,25 +46,29 @@ router.get('/workflow_inc', function (req, res, next) {
     if (form_workflow_identifier) {
         query.identifier = form_workflow_identifier;
     }
-    if (form_workflow_status) {
-        switch (form_workflow_status) {
-            case 'Waiting':
-                query['tasks.0.status'] = 200;
-                break;
-            case 'Running':
-                query['tasks.0.status'] = 300;
-                break;
-            case 'Failed':
-                query['tasks.0.status'] = 499;
-                break;
-            case 'Complete':
-                query['tasks.0.status'] = 600;
-                break;
 
-            default:
-                break;
-        }
+    switch (form_workflow_status) {
+        case 'Waiting':
+            query['tasks.0.status'] = 200;
+            break;
+        case 'Running':
+            query['tasks.0.status'] = 350;
+            break;
+        case 'Failed':
+            query['tasks.0.status'] = 499;
+            break;
+        case 'Complete':
+            query['tasks.0.status'] = 600;
+            break;
+        case '':
+        case null:
+        case undefined:
+            break;
+        default:
+            console.log("Unknown status: " + form_workflow_status)
+            break;
     }
+
     Workflow.find(query, function (err, workflows) {
         if (err) return next(err);
         res.render('workflow_inc', {
@@ -198,8 +202,8 @@ function status(workflow) {
     workflow.isNew = false;
     let now = new Date();
 
-    let seconds_begin = Math.floor((now - workflow.task.begin) ); // The difference between now and the last call from the agent.
-    let seconds_end = Math.floor((now - workflow.task.end) ); // The difference between now and the last call from the agent.
+    let seconds_begin = Math.floor((now - workflow.task.begin)); // The difference between now and the last call from the agent.
+    let seconds_end = Math.floor((now - workflow.task.end)); // The difference between now and the last call from the agent.
 
     console.log("Workflow status " + workflow.fileset + ':' + workflow.task.queue + ':' + workflow.task.status + ':' + workflow.task.retry + ':' + seconds_begin + ':' + seconds_end);
     switch (workflow.task.status) {
@@ -221,25 +225,19 @@ function status(workflow) {
             amq(workflow);
             break;
         case 300:
-            if ( workflow.status !== 1) {
-                workflow.status = 1;
+            if (seconds_end > ONE_HOUR) { // For one hour no response yet?
+                console.log("No response from agent. Is the agent offline or busy? Task: " + workflow.task.queue);
+                amq(workflow);
+            } else {
+                save(workflow);
             }
-            save(workflow);
-            // if (seconds_end > ONE_HOUR) { // For one hour no response yet?
-            //     console.log("No response from agent. Is the agent offline or busy? Task: " + workflow.task.queue);
-            //     amq(workflow);
-            // } else {
-            //     if ( workflow.status !== 1) {
-            //         workflow.status = 1;
-            //         save(workflow);
-            //     }
-            // }
             break;
         case 350:
             workflow.status = 1;
             save(workflow);
             break;
         case 360:
+            workflow.status = 2;
             save(workflow);
             break;
         case 400:
@@ -252,7 +250,7 @@ function status(workflow) {
             save(workflow);
             break;
         case 499:
-            if (workflow.task.retry && seconds_end > workflow.task.retry ) { // For hour no response yet
+            if (workflow.task.retry && seconds_end > workflow.task.retry) { // For hour no response yet
                 console.log("No response from agent. Is the agent offline or busy? Task: " + workflow.task.queue);
                 amq(workflow);
             }
@@ -266,16 +264,20 @@ function status(workflow) {
             status(workflow);
             break;
         case 600:
-            if (workflow.complete && workflow.status !== 2) {
-                console.log("Workflow end " + workflow.task.queue);
-                workflow.status = 2; // this will move the document to another collection.
-                send_mail(workflow, 'Success', false);
-                save(workflow);
+            if (workflow.complete) {
+                if (workflow.delete_on_success) {
+                    console.log("Delete workflow " + workflow.task.queue);
+                    workflow.delete();
+                } else {
+                    console.log("Completed workflow " + workflow.task.queue);
+                    workflow.status = 2; // this will move the document to another collection.
+                    send_mail(workflow, 'Success', false);
+                    save(workflow);
+                }
+            } else {
+                console.log("Workflow still running... " + workflow.task.queue);
             }
-            if (workflow.complete && workflow.delete_on_success) {
-                console.log("Delete workflow " + workflow.task.queue);
-                workflow.delete();
-            }
+
             break;
         default:
             console.log("Ignoring...");

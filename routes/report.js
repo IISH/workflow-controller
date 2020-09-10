@@ -33,29 +33,26 @@ router.get('/report_inc', function (req, res, next) {
     let form_report_name = req.query.form_report_name;
     let form_report_status = req.query.form_report_status;
     let sort = req.query.sort || 'accession';
-    let query = ( form_report_name ) ? {archive: form_report_name} : {};
-    if ( form_workflow_name ) {
+    let query = (form_report_name) ? {archive: form_report_name} : {};
+    if (form_workflow_name) {
         query['name'] = form_workflow_name
     }
 
-    if (form_report_status) {
-        switch (form_report_status) {
-            case 'Error':
-                query['status'] = -1;
-                break;
-            case 'Waiting':
-                query['status'] = 0;
-                break;
-            case 'Running':
-                query['status'] = 1;
-                break;
-            case 'Complete':
-                query['status'] = 2;
-                break;
-
-            default:
-                break;
-        }
+    switch (form_report_status) {
+        case 'Error':
+            query['status'] = -1;
+            break;
+        case 'Waiting':
+            query['status'] = 0;
+            break;
+        case 'Running':
+            query['status'] = 1;
+            break;
+        case 'Complete':
+            query['status'] = 2;
+            break;
+        default:
+            break;
     }
 
     Workflow.find(query, function (err, workflows) {
