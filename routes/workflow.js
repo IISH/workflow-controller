@@ -237,8 +237,13 @@ function status(workflow) {
             save(workflow);
             break;
         case 360:
-            workflow.status = 2;
-            save(workflow);
+            if (seconds_end > ONE_HOUR) { // For one hour no response yet?
+                console.log("No response from agent. Is the agent offline or busy? Task: " + workflow.task.queue);
+                amq(workflow);
+            } else {
+                workflow.status = 2;
+                save(workflow);
+            }
             break;
         case 400:
         case 450:
