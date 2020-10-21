@@ -150,12 +150,9 @@ router.post("/", (req, res) => {
             res.end(JSON.stringify({status: 500, message: err}));
         } else {
             if (workflow == null) { // a new flow
+                console.info("This workflow is new. Start a new flow: " + fileset);
                 createFlow();
             } else {
-                if (workflow.complete || workflow.stuck) {
-                    workflow.delete();
-                    createFlow();
-                }
                 console.info("This workflow is running. Ignoring request: " + fileset);
             }
         }
