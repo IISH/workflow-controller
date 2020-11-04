@@ -25,7 +25,7 @@ const workflows = nconf.get('workflows');
 for (let workflow in workflows) {
     if (workflows.hasOwnProperty(workflow)) {
         let flow = workflows[workflow];
-        if (flow.enabled === true) {
+        if (flow.enable === true) {
             let hotfolders = flow.events;
             console.log("Watching fs events for workflow:" + workflow + " in hotfolders: " + hotfolders);
             let fsWatcher = chokidar.watch(hotfolders, {
@@ -95,7 +95,7 @@ const stale = function () {
     for (let workflow in workflows) {
         if (workflows.hasOwnProperty(workflow)) {
             let flow = workflows[workflow];
-            if (flow.enabled === true) {
+            if (flow.enable === true) {
                 let hotfolders = flow.events;
                 hotfolders.forEach(function (hotfolder) {
                     console.log("Status hotfolder: " + hotfolder);
