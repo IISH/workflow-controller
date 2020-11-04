@@ -95,22 +95,26 @@ const stale = function () {
     for (let workflow in workflows) {
         if (workflows.hasOwnProperty(workflow)) {
             let flow = workflows[workflow];
-            let hotfolders = flow.events;
-            hotfolders.forEach(function (hotfolder) {
-                console.log("Status hotfolder: " + hotfolder);
-                let _url = url + '/queues/' + workflow;
-                request.put(
-                    _url,
-                    function (error, response, body) {
-                        if (!error && response.statusCode === 200) {
-                            console.log(body)
-                        } else {
-                            console.error('Error with put to ' + url);
-                            console.error(error);
+            if (flow.enabled === true) {
+                let hotfolders = flow.events;
+                hotfolders.forEach(function (hotfolder) {
+                    console.log("Status hotfolder: " + hotfolder);
+                    let _url = url + '/queues/' + workflow;
+                    request.put(
+                        _url,
+                        function (error, response, body) {
+                            if (!error && response.statusCode === 200) {
+                                console.log(body)
+                            } else {
+                                console.error('Error with put to ' + url);
+                                console.error(error);
+                            }
                         }
-                    }
-                );
-            });
+                    );
+                });
+            } else {
+                console.log('Ignoring disabled workflow ' + workflow);
+            }
         }
     }
 };
