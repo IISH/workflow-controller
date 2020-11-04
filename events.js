@@ -25,46 +25,50 @@ const workflows = nconf.get('workflows');
 for (let workflow in workflows) {
     if (workflows.hasOwnProperty(workflow)) {
         let flow = workflows[workflow];
-        let hotfolders = flow.events;
-        console.log("Watching fs events for workflow:" + workflow + " in hotfolders: " + hotfolders);
-        let fsWatcher = chokidar.watch(hotfolders, {
-            depth: 0,
-            ignored: /(^|[\/\\])\../,
-            ignoreInitial: true,
-            interval: 3000,
-            usePolling: true
-        });
-        fsWatcher
-            .on('addDir', (fileset) => {
-                sent(workflow, fileset);
-            })
-            .on('add', (filename) => {
-                let extname = path.extname(filename).toLowerCase();
-                if (extension.includes(extname)) {
-                    let hotfolder = path.dirname(filename);
-                    fs.readFileSync(filename, "utf8").split("\n")
-                        .map(element => element.trim())
-                        .filter(function (element, index, array) {
-                            return element.length !== 0 && array.indexOf(element) === index;
-                        })
-                        .forEach(function (identifier) {
-                                let fileset = hotfolder + '/' + identifier;
-                                try {
-                                    fs.mkdirSync(fileset, {recursive: false});
-                                    console.log('Fileset added: ' + fileset);
-                                } catch (err) {
-                                    console.warn(err);
-                                }
-                            }
-                        );
-                    fs.unlink(filename, function (err) {
-                        if (err) {
-                            console.log(err);
-                        }
-                        console.log('File removed: ' + filename);
-                    });
-                }
+        if (flow.enabled === true) {
+            let hotfolders = flow.events;
+            console.log("Watching fs events for workflow:" + workflow + " in hotfolders: " + hotfolders);
+            let fsWatcher = chokidar.watch(hotfolders, {
+                depth: 0,
+                ignored: /(^|[\/\\])\../,
+                ignoreInitial: true,
+                interval: 3000,
+                usePolling: true
             });
+            fsWatcher
+                .on('addDir', (fileset) => {
+                    sent(workflow, fileset);
+                })
+                .on('add', (filename) => {
+                    let extname = path.extname(filename).toLowerCase();
+                    if (extension.includes(extname)) {
+                        let hotfolder = path.dirname(filename);
+                        fs.readFileSync(filename, "utf8").split("\n")
+                            .map(element => element.trim())
+                            .filter(function (element, index, array) {
+                                return element.length !== 0 && array.indexOf(element) === index;
+                            })
+                            .forEach(function (identifier) {
+                                    let fileset = hotfolder + '/' + identifier;
+                                    try {
+                                        fs.mkdirSync(fileset, {recursive: false});
+                                        console.log('Fileset added: ' + fileset);
+                                    } catch (err) {
+                                        console.warn(err);
+                                    }
+                                }
+                            );
+                        fs.unlink(filename, function (err) {
+                            if (err) {
+                                console.log(err);
+                            }
+                            console.log('File removed: ' + filename);
+                        });
+                    }
+                });
+        } else {
+            console.log('Ignoring disabled workflow ' + workflow);
+        }
     }
 }
 
@@ -110,8 +114,9 @@ const stale = function () {
         }
     }
 };
-
-if (timeout !== heartbeat) {
-    setTimeout(stale, timeout);
-}
-setInterval(stale, heartbeat);
+//
+// if (timeout !== heartbeat) {
+//     setTimeout(stale, timeout);
+// }
+// setInterval(stale, heartbeat);
+stale();

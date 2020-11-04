@@ -12,6 +12,7 @@ module.exports = function(workflow) {
     let url = amq.protocol + '://' + amq.host + ':' + amq.port + '/api/message/' + workflow.task.queue + '?type=' + workflow.task.type;
     workflow.task.identifier = Workflow.identifier();
     let form = {body: workflow.task.identifier};
+    console.log('amq ' + url + ' ' + form);
     request.post({url: url, form: form},
         function (error, response, body) {
             if (!error && response.statusCode === 200) {
