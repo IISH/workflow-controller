@@ -153,7 +153,9 @@ router.post("/", (req, res) => {
                 console.info("This workflow is new. Start a new flow: " + fileset);
                 createFlow();
             } else {
-                console.info("This workflow is running. Ignoring request: " + fileset);
+                console.log("Delete workflow " + workflow.task.queue);
+                workflow.delete();
+                createFlow();
             }
         }
     });

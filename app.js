@@ -49,6 +49,9 @@ app.use('/workflow', workflowRouter);
 const archiveRouter = require('./routes/archive');
 app.use('/archive', archiveRouter);
 
+const pingRouter = require('./routes/ping');
+app.use('/ping', pingRouter);
+
 const reportRouter = require('./routes/report');
 app.use('/report', reportRouter);
 

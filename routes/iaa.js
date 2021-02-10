@@ -23,6 +23,7 @@ module.exports = function (app, passport, web) {
                 case '/denied': // 403 not authorized. See the config users key
                 case '/failed': // 401 unknown
                 case '/login': // 401 login
+                case '/ping': // 200
                 case '/openid-connect-login':
                     next();
                     break;
@@ -36,12 +37,14 @@ module.exports = function (app, passport, web) {
                     } else {
                         const accesstoken = web.accesstoken;
                         if (accesstoken === req.params.accesstoken) {
+                            req.user = {authorized: true, fullname: 'api user'};
                             next();
                         } else {
                             let authorization = req.headers.authorization;
                             if (authorization) {
                                 let split = authorization.split(' ', 2); // expect "Bearer [accesstoken]"
                                 if (accesstoken === split[1]) {
+                                    req.user = {authorized: true, fullname: 'api user'};
                                     next()
                                 }
                             } else {
