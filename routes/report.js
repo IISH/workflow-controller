@@ -60,7 +60,9 @@ router.get('/report_inc', function (req, res, next) {
         res.render('report_inc', {
             workflows: workflows,
             status: {'-1': '✘', 0: '?', 1: '✔'},
-            form_report_status: form_report_status
+            form_report_status: form_report_status,
+            iiif_url: nconf.get('web').iiif_url,
+            handle_url: nconf.get('web').handle_url
         })
     }).sort(sort).limit(limit);
 });

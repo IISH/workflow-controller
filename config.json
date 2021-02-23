@@ -4,6 +4,8 @@
     "endpoint": "http://localhost:3000",
     "session_secret": "93e01642900d",
     "heartbeat": 1800000,
+    "iiif": "http://localhost",
+    "manifest": "http://localhost"
   },
   "datasource": {
     "protocol": "mongodb",
