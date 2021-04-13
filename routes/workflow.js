@@ -117,7 +117,10 @@ router.post("/", (req, res) => {
             let order = 0;
             let accession = path.basename(req.body.fileset);
             let i = accession.indexOf('.');
-            let archive = (i === -1) ? accession : accession.substring(0, accession.indexOf('.'));
+            if ( i === 0 ) {
+                i = accession.indexOf('_', accession.indexOf('_') + 1);
+            }
+            let archive = (i === -1) ? accession : accession.substring(0, i);
             workflow = Workflow({
                 identifier: Workflow.identifier(),
                 name: name,
