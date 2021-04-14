@@ -117,7 +117,7 @@ router.post("/", (req, res) => {
             let order = 0;
             let accession = path.basename(req.body.fileset);
             let i = accession.indexOf('.');
-            if ( i === 0 ) {
+            if ( i === -1 ) {
                 i = accession.indexOf('_', accession.indexOf('_') + 1);
             }
             let archive = (i === -1) ? accession : accession.substring(0, i);
