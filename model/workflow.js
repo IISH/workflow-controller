@@ -76,6 +76,7 @@ let workflowSchema = new dao.Schema({
     identifier: String,
     name: String,
     fileset: {type: String, index: {unique: true, dropDups: true}},
+    birthtime: Date,
     accession: {type: String, index: {unique: false, dropDups: false}},
     archive: {type: String, index: {unique: false, dropDups: false}},
     begin: Date,

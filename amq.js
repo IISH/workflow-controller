@@ -17,6 +17,7 @@ module.exports = function(workflow) {
         function (error, response, body) {
             if (!error && response.statusCode === 200) {
                 console.log(body);
+                workflow.status = 0;
                 workflow.task.info = 'send to queue';
                 workflow.task.begin = new Date();
                 workflow.task.status = 200;

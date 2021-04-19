@@ -14,8 +14,10 @@ const Workflow = require('../model/workflow');
 const nodemailer = require('nodemailer');
 const path = require('path');
 const amq = require('../amq');
+const fs = require('fs');
 
 const ONE_MINUTE = 60 * 1000;
+const THREE_MINUTES = 3 * 1000;
 const ONE_HOUR = 60 * ONE_MINUTE;
 
 const Map = require('collections/map');
@@ -101,6 +103,8 @@ router.get('/:identifier', function (req, res) {
     res.end(JSON.stringify({status: 200, workflow: req.workflow}));
 });
 
+
+
 // A workflow consists of one or more tasks.
 router.post("/", (req, res) => {
 
@@ -117,14 +121,16 @@ router.post("/", (req, res) => {
             let order = 0;
             let accession = path.basename(req.body.fileset);
             let i = accession.indexOf('.');
-            if ( i === -1 ) {
+            if (i === -1) {
                 i = accession.indexOf('_', accession.indexOf('_') + 1);
             }
             let archive = (i === -1) ? accession : accession.substring(0, i);
             workflow = Workflow({
                 identifier: Workflow.identifier(),
                 name: name,
+                status: 0,
                 fileset: fileset,
+                birthtime: birthtime(fileset),
                 accession: accession,
                 archive: archive,
                 begin: new Date(),
@@ -156,9 +162,16 @@ router.post("/", (req, res) => {
                 console.info("This workflow is new. Start a new flow: " + fileset);
                 createFlow();
             } else {
-                console.log("Delete workflow " + workflow.task.queue);
-                workflow.delete();
-                createFlow();
+                if (fs.existsSync(fileset)) {
+                    if ( workflow.birthtime === null || workflow.birthtime.getTime() < birthtime(fileset).getTime()) {
+                        console.info("Hotfolder fileset is new. Start a new flow: " + fileset);
+                        workflow.delete();
+                        createFlow();
+                    }
+                } else {
+                    console.info("Hotfolder fileset does not exist, yet we have an entry. Deleting entry " + fileset);
+                    workflow.delete();
+                }
             }
         }
     });
@@ -227,19 +240,14 @@ function status(workflow) {
             amq(workflow);
             break;
         case 300:
-            if (seconds_end > ONE_HOUR) { // For one hour no response yet?
-                console.log("No response from agent. Is the agent offline or busy? Task: " + workflow.task.queue);
-                amq(workflow);
-            } else {
-                save(workflow);
-            }
-            break;
-        case 350:
+            workflow.task.status = 350;
+            //break; we want a fall through to the next case
+        case 350: // StatusCodeTaskReceipt from agent
             workflow.status = 1;
             save(workflow);
             break;
-        case 360:
-            if (seconds_end > ONE_HOUR) { // For one hour no response yet?
+        case 360: // StatusCodeTaskWorking from agent
+            if (seconds_end > THREE_MINUTES) { // For time no response yet?
                 console.log("No response from agent. Is the agent offline or busy? Task: " + workflow.task.queue);
                 amq(workflow);
             } else {
@@ -292,18 +300,18 @@ function status(workflow) {
 }
 
 // see if we are not stale or failed. If so retry
-router.put('/queues/:workflow_name', function (req, res) {
+router.put('/heartbeat', function (req, res) {
     res.setHeader('Content-Type', 'application/json');
     let filesets = []; // something to report
-    let workflow_name = req.params.workflow_name;
 
-    let query = (workflow_name) ? {'name': workflow_name} : {};
+    const query = {$or: [{'tasks.0.status': 350}, {'tasks.0.status': 360}]};
     Workflow.find(query).stream()
         .on('error', function (err) {
             res.status(500);
             res.end(JSON.stringify({status: 500, message: err}));
         })
         .on('data', function (workflow) {
+            filesets.push(workflow.fileset);
             status(Workflow(workflow));
         });
 
@@ -400,6 +408,10 @@ function send_mail(workflow, subject, has_error) {
 
 async function save(workflow) {
     await workflow.save();
+}
+
+async function birthtime(fileset) {
+    return fs.statSync(fileset).birthtime;
 }
 
 module.exports = router;
