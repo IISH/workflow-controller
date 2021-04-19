@@ -163,7 +163,7 @@ router.post("/", (req, res) => {
                 createFlow();
             } else {
                 if (fs.existsSync(fileset)) {
-                    if ( workflow.birthtime === null || workflow.birthtime.getTime() < birthtime(fileset).getTime()) {
+                    if ( workflow.birthtime === null || workflow.birthtime < birthtime(fileset)) {
                         console.info("Hotfolder fileset is new. Start a new flow: " + fileset);
                         workflow.delete();
                         createFlow();
@@ -410,8 +410,8 @@ async function save(workflow) {
     await workflow.save();
 }
 
-async function birthtime(fileset) {
-    return fs.statSync(fileset).birthtime;
+function birthtime(fileset) {
+    return fs.statSync(fileset).birthtime.getTime();
 }
 
 module.exports = router;
