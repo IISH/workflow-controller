@@ -104,7 +104,6 @@ router.get('/:identifier', function (req, res) {
 });
 
 
-
 // A workflow consists of one or more tasks.
 router.post("/", (req, res) => {
 
@@ -130,7 +129,6 @@ router.post("/", (req, res) => {
                 name: name,
                 status: 0,
                 fileset: fileset,
-                birthtime: birthtime(fileset),
                 accession: accession,
                 archive: archive,
                 begin: new Date(),
@@ -163,14 +161,17 @@ router.post("/", (req, res) => {
                 createFlow();
             } else {
                 if (fs.existsSync(fileset)) {
-                    if ( workflow.birthtime === null || workflow.birthtime < birthtime(fileset)) {
-                        console.info("Hotfolder fileset is new. Start a new flow: " + fileset);
+                    if ( workflow.status === -1 || workflow.complete) {
+                        console.info("Fileset is new. Start a new flow: " + fileset);
                         workflow.delete();
                         createFlow();
+                    } else {
+                        console.info("Fileset is still running: " + fileset);
                     }
                 } else {
-                    console.info("Hotfolder fileset does not exist, yet we have an entry. Deleting entry " + fileset);
-                    workflow.delete();
+                    console.info("Hotfolder fileset does not exist, yet we have an entry. Deleting entry? " + fileset);
+                    let seconds_end = Math.floor((new Date() - workflow.task.end));
+                    (workflow.status === -1 || workflow.delete_on_success && seconds_end > THREE_MINUTES) && workflow.delete();
                 }
             }
         }
@@ -241,7 +242,7 @@ function status(workflow) {
             break;
         case 300:
             workflow.task.status = 350;
-            //break; we want a fall through to the next case
+        //break; because we do want a fall through to the next case
         case 350: // StatusCodeTaskReceipt from agent
             workflow.status = 1;
             save(workflow);
@@ -408,10 +409,6 @@ function send_mail(workflow, subject, has_error) {
 
 async function save(workflow) {
     await workflow.save();
-}
-
-function birthtime(fileset) {
-    return fs.statSync(fileset).birthtime.getTime();
 }
 
 module.exports = router;

@@ -12,14 +12,14 @@
 
 'use strict';
 
-// const cron = require('node-cron');
 const nconf = require('nconf');
-const fs = require('fs');
+const chokidar = require('chokidar');
+const fs = require('fs-extra');
 const path = require('path');
 const request = require('request');
 const url = nconf.get('web').endpoint + '/workflow';
 const extension = ['.txt', '.csv'];
-const systemfile = ['new folder', 'tmp', 'temp'];
+const systemfile = ['new folder', 'tmp', 'temp', 'work'];
 
 const workflows = nconf.get('workflows');
 for (let workflow in workflows) {
@@ -27,59 +27,48 @@ for (let workflow in workflows) {
         let flow = workflows[workflow];
         if (flow.enable === true) {
             let hotfolders = flow.events;
-            console.log("Candidate workflow '" + workflow + "' in hotfolders: " + hotfolders);
-            for (let _hotfolder in hotfolders) {
-                if (hotfolders.hasOwnProperty(_hotfolder)) {
-                    let hotfolder = hotfolders[_hotfolder];
-                    if (fs.existsSync(hotfolder)) {
-                        console.log("Monitoring '" + workflow);
-                        setInterval(function () {
-                            // Iterate though each folder and file
-
-                            fs.readdirSync(hotfolder).forEach(filename => {
-                                if (filename[0] === '.' || systemfile.includes(filename.toLowerCase())) {
-                                    console.log("Ignore system file " + filename)
-                                } else {
-                                    let fullpath = hotfolder + '/' + filename;
-                                    console.log("Detect " + fullpath)
-                                    if (fs.lstatSync(fullpath).isDirectory()) {
-                                        sent(workflow, fullpath);
-                                    } else if (fs.lstatSync(fullpath).isFile()) {
-                                        let extname = path.extname(filename).toLowerCase();
-                                        if (extension.includes(extname)) {
-                                            fs.readFileSync(fullpath, "utf8").split("\n")
-                                                .map(element => element.trim())
-                                                .filter(function (element, index, array) {
-                                                    return element.length !== 0 && array.indexOf(element) === index;
-                                                })
-                                                .forEach(function (identifier) {
-                                                        let fileset = hotfolder + '/' + identifier;
-                                                        try {
-                                                            fs.mkdirSync(fileset, {recursive: false});
-                                                            console.log('Fileset added: ' + fileset);
-                                                        } catch (err) {
-                                                            console.warn(err);
-                                                        }
-                                                    }
-                                                );
-                                            console.log('Removing the file: ' + fullpath);
-                                            fs.unlink(fullpath, function (err) {
-                                                if (err) {
-                                                    console.log(err);
-                                                }
-                                            });
-                                        }
-                                    } else {
-                                        console.log("Unknown file type " + fullpath);
+            console.log("Watching fs events for workflow:" + workflow + " in hotfolders: " + hotfolders);
+            let fsWatcher = chokidar.watch(hotfolders, {
+                depth: 0,
+                ignored: /(^|[\/\\])\../,
+                ignoreInitial: true,
+                interval: 3000,
+                usePolling: true
+            });
+            fsWatcher
+                .on('addDir', (fileset) => {
+                    let accession = path.basename(fileset);
+                    if (!systemfile.includes(accession.toLowerCase())) {
+                        sent(workflow, fileset);
+                    }
+                })
+                .on('add', (filename) => {
+                    let extname = path.extname(filename).toLowerCase();
+                    if (extension.includes(extname)) {
+                        let hotfolder = path.dirname(filename);
+                        fs.readFileSync(filename, "utf8").split("\n")
+                            .map(element => element.trim())
+                            .filter(function (element, index, array) {
+                                return element.length !== 0 && array.indexOf(element) === index;
+                            })
+                            .forEach(function (identifier) {
+                                    let fileset = hotfolder + '/' + identifier;
+                                    try {
+                                        fs.mkdirSync(fileset, {recursive: false});
+                                        console.log('Fileset added: ' + fileset);
+                                    } catch (err) {
+                                        console.warn(err);
                                     }
                                 }
-                            })
-                        }, 3000);
-                    } else {
-                        console.log("This hotfolder " + hotfolder + " does not exist and will be ignored. To enable, create the folder and restart this application");
+                            );
+                        fs.unlink(filename, function (err) {
+                            if (err) {
+                                console.log(err);
+                            }
+                            console.log('File removed: ' + filename);
+                        });
                     }
-                }
-            }
+                });
         } else {
             console.log('Ignoring disabled workflow ' + workflow);
         }

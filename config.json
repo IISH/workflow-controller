@@ -58,8 +58,10 @@
       ]
     }
   },
+  "events": {
+    "limit": 10
+  },
   "users": {
-
   },
   "mailer": {
     "host": "localhost",
