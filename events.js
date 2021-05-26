@@ -20,6 +20,7 @@ const path = require('path');
 const request = require('request');
 const url = nconf.get('web').endpoint + '/workflow';
 const extension = ['.txt', '.csv'];
+const systemfile = ['new folder', 'tmp', 'temp', 'work'];
 
 const workflows = nconf.get('workflows');
 for (let workflow in workflows) {
@@ -37,7 +38,10 @@ for (let workflow in workflows) {
             });
             fsWatcher
                 .on('addDir', (fileset) => {
-                    sent(workflow, fileset);
+                    let accession = path.basename(fileset);
+                    if (!systemfile.includes(accession.toLowerCase())) {
+                        sent(workflow, fileset);
+                    }
                 })
                 .on('add', (filename) => {
                     let extname = path.extname(filename).toLowerCase();

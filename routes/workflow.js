@@ -14,8 +14,10 @@ const Workflow = require('../model/workflow');
 const nodemailer = require('nodemailer');
 const path = require('path');
 const amq = require('../amq');
+const fs = require('fs');
 
 const ONE_MINUTE = 60 * 1000;
+const THREE_MINUTES = 3 * 1000;
 const ONE_HOUR = 60 * ONE_MINUTE;
 
 const Map = require('collections/map');
@@ -101,6 +103,7 @@ router.get('/:identifier', function (req, res) {
     res.end(JSON.stringify({status: 200, workflow: req.workflow}));
 });
 
+
 // A workflow consists of one or more tasks.
 router.post("/", (req, res) => {
 
@@ -117,13 +120,14 @@ router.post("/", (req, res) => {
             let order = 0;
             let accession = path.basename(req.body.fileset);
             let i = accession.indexOf('.');
-            if ( i === -1 ) {
+            if (i === -1) {
                 i = accession.indexOf('_', accession.indexOf('_') + 1);
             }
             let archive = (i === -1) ? accession : accession.substring(0, i);
             workflow = Workflow({
                 identifier: Workflow.identifier(),
                 name: name,
+                status: 0,
                 fileset: fileset,
                 accession: accession,
                 archive: archive,
