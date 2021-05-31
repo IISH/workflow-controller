@@ -37,6 +37,9 @@ for (let workflow in workflows) {
                 usePolling: true
             });
             fsWatcher
+                .on('unlinkDir', (fileset) => {
+                    remove(fileset);
+                })
                 .on('addDir', (fileset) => {
                     let accession = path.basename(fileset);
                     if (!systemfile.includes(accession.toLowerCase())) {
@@ -90,41 +93,28 @@ function sent(workflow, fileset) {
         });
 }
 
+function remove(fileset) {
+    console.log("workflow removal not implemented: " + fileset);
+}
+
 
 // Database check to recover from stale, failed or lost messages.
 const timeout = 10000;
 let heartbeat = nconf.get('web').heartbeat || timeout;
-console.info('Heartbeat ' + heartbeat);
+console.info('Heartbeat interval is ' + heartbeat);
 const stale = function () {
-    for (let workflow in workflows) {
-        if (workflows.hasOwnProperty(workflow)) {
-            let flow = workflows[workflow];
-            if (flow.enable === true) {
-                let hotfolders = flow.events;
-                hotfolders.forEach(function (hotfolder) {
-                    console.log("Status hotfolder: " + hotfolder);
-                    let _url = url + '/queues/' + workflow;
-                    request.put(
-                        _url,
-                        function (error, response, body) {
-                            if (!error && response.statusCode === 200) {
-                                console.log(body)
-                            } else {
-                                console.error('Error with put to ' + url);
-                                console.error(error);
-                            }
-                        }
-                    );
-                });
+    let _url = url + '/heartbeat';
+    request.put(
+        _url,
+        function (error, response, body) {
+            if (!error && response.statusCode === 200) {
+                console.log(body)
             } else {
-                console.log('Ignoring disabled workflow ' + workflow);
+                console.error('Error with put to ' + url);
+                console.error(error);
             }
         }
-    }
+    );
 };
-//
-// if (timeout !== heartbeat) {
-//     setTimeout(stale, timeout);
-// }
-// setInterval(stale, heartbeat);
-stale();
+
+setInterval(stale, heartbeat);

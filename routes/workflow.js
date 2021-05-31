@@ -17,7 +17,7 @@ const amq = require('../amq');
 const fs = require('fs');
 
 const ONE_MINUTE = 60 * 1000;
-const THREE_MINUTES = 3 * 1000;
+const THREE_MINUTES = 3 * ONE_MINUTE;
 const ONE_HOUR = 60 * ONE_MINUTE;
 
 const Map = require('collections/map');
@@ -120,7 +120,7 @@ router.post("/", (req, res) => {
             let order = 0;
             let accession = path.basename(req.body.fileset);
             let i = accession.indexOf('.');
-            if (i === -1) {
+            if (i === -1) { // the accession ID can also contain other separators, like an underscore.
                 i = accession.indexOf('_', accession.indexOf('_') + 1);
             }
             let archive = (i === -1) ? accession : accession.substring(0, i);
@@ -242,8 +242,8 @@ function status(workflow) {
             workflow.status = 1;
             save(workflow);
             break;
-        case 360:
-            if (seconds_end > ONE_HOUR) { // For one hour no response yet?
+        case 360: // StatusCodeTaskWorking from agent
+            if (seconds_end > THREE_MINUTES) { // For time no response yet?
                 console.log("No response from agent. Is the agent offline or busy? Task: " + workflow.task.queue);
                 amq(workflow);
             } else {
@@ -296,23 +296,48 @@ function status(workflow) {
 }
 
 // see if we are not stale or failed. If so retry
-router.put('/queues/:workflow_name', function (req, res) {
+let run_heartbeat = 0;
+router.put('/heartbeat', function (req, res) {
     res.setHeader('Content-Type', 'application/json');
     let filesets = []; // something to report
-    let workflow_name = req.params.workflow_name;
+    let clear = []; // something to delete
 
-    let query = (workflow_name) ? {'name': workflow_name} : {};
+    if ( run_heartbeat > 10) { // odd.... remove lock
+        run_heartbeat = 0;
+    }
+
+    if ( run_heartbeat++ !== 1 ) {
+        res.status(200);
+        res.end(JSON.stringify({status: 200, message: 'Still running heartbeat...' + run_heartbeat}));
+        return;
+    }
+
+    const query = {};
     Workflow.find(query).stream()
         .on('error', function (err) {
             res.status(500);
             res.end(JSON.stringify({status: 500, message: err}));
         })
         .on('data', function (workflow) {
-            status(Workflow(workflow));
+
+            filesets.push(workflow.fileset);
+
+            let _workflow = Workflow(workflow);
+            if (fs.existsSync(workflow.fileset)) {
+                console.log("Heartbeat status check for workflow " + workflow.fileset);
+                status(_workflow);
+            } else {
+                if ( workflow.complete === false || workflow.delete_on_success) {
+                    console.log("Fileset no longer on filesystem. Removing workflow " + workflow.fileset);
+                    _workflow.delete();
+                }
+            }
         });
 
     res.status(200);
     res.end(JSON.stringify({status: 200, message: filesets}));
+
+    run_heartbeat = 0;
 });
 
 router.post('/queue/:identifier', function (req, res) {
