@@ -31,5 +31,5 @@ each workflow in workflows || []
                         td(scope='col') #{task.start}
                         td(scope='col') #{task.duration}
                         td(scope='col')
-                            a(href='workflow/retry/' + task.identifier + '?form_workflow_name=' + form_workflow_name class='btn btn-info' role='button') Retry (#{retrytime})
+                            a(href='workflow/retry/' + task.identifier + '?form_workflow_name=' + form_workflow_name class='btn btn-info' role='button') Retry (#{task.retrytime})
                             a(href='workflow/skip/' + task.identifier + '?form_workflow_name=' + form_workflow_name class='btn btn-info' role='button') Skip

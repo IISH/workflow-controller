@@ -300,10 +300,9 @@ function status(workflow) {
 let run_heartbeat = 0;
 router.put('/heartbeat', function (req, res) {
     res.setHeader('Content-Type', 'application/json');
-    let statuschecked = []; // something to report
-    let deleted = []; // something to delete
 
     if ( run_heartbeat > 10) { // odd.... remove lock
+        console.log("Remove hearbeat lock.");
         run_heartbeat = 0;
     }
 
@@ -312,6 +311,10 @@ router.put('/heartbeat', function (req, res) {
         res.end(JSON.stringify({status: 200, message: 'Still running heartbeat...' + run_heartbeat}));
         return;
     }
+
+    console.log("Start status check.");
+    let statuschecked = []; // something to report
+    let deleted = []; // something to delete
 
     const query = {};
     Workflow.find(query).stream()
