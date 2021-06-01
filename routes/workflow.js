@@ -210,8 +210,9 @@ function status(workflow) {
 
     let seconds_begin = Math.floor((now - workflow.task.begin)); // The difference between now and the last call from the agent.
     let seconds_end = Math.floor((now - workflow.task.end)); // The difference between now and the last call from the agent.
+    let running_time = seconds_end - seconds_begin;
 
-    console.log("Workflow status " + workflow.fileset + ':' + workflow.task.queue + ':' + workflow.task.status + ':' + workflow.task.retry + ':' + seconds_begin + ':' + seconds_end);
+    console.log("Workflow status " + workflow.fileset + ':' + workflow.task.queue + ':' + workflow.task.status + ':' + workflow.task.retry + ':' + seconds_begin + ':' + seconds_end + ':' + running_time);
     switch (workflow.task.status) {
         case 100:
         case 150:
@@ -261,8 +262,8 @@ function status(workflow) {
             save(workflow);
             break;
         case 499:
-            if (workflow.task.retry && seconds_end > workflow.task.retry) { // For hour no response yet
-                console.log("No response from agent. Is the agent offline or busy? Task: " + workflow.task.queue);
+            if (workflow.task.retry && running_time > workflow.task.retry) { // For hour no response yet
+                console.log("Retry task: " + workflow.task.queue);
                 amq(workflow);
             }
             break;
@@ -299,8 +300,8 @@ function status(workflow) {
 let run_heartbeat = 0;
 router.put('/heartbeat', function (req, res) {
     res.setHeader('Content-Type', 'application/json');
-    let filesets = []; // something to report
-    let clear = []; // something to delete
+    let statuschecked = []; // something to report
+    let deleted = []; // something to delete
 
     if ( run_heartbeat > 10) { // odd.... remove lock
         run_heartbeat = 0;
@@ -320,24 +321,24 @@ router.put('/heartbeat', function (req, res) {
         })
         .on('data', function (workflow) {
 
-            filesets.push(workflow.fileset);
-
             let _workflow = Workflow(workflow);
             if (fs.existsSync(workflow.fileset)) {
                 console.log("Heartbeat status check for workflow " + workflow.fileset);
+                statuschecked.push(workflow.fileset);
                 status(_workflow);
             } else {
                 if ( workflow.complete === false || workflow.delete_on_success) {
                     console.log("Fileset no longer on filesystem. Removing workflow " + workflow.fileset);
+                    deleted.push(workflow.fileset);
                     _workflow.delete();
                 }
             }
         });
 
-    res.status(200);
-    res.end(JSON.stringify({status: 200, message: filesets}));
-
     run_heartbeat = 0;
+
+    res.status(200);
+    res.end(JSON.stringify({status: 200, message: {statuschecked:statuschecked, deleted: deleted}}));
 });
 
 router.post('/queue/:identifier', function (req, res) {

@@ -72,6 +72,21 @@ taskSchema.virtual('duration').get(function () {
     return ('00' + hours).substr(-2) + ':' + ('00' + minutes).substr(-2) + ':' + ('00' + seconds).substr(-2);
 });
 
+/**
+ * retrytime = time to retry a failed task
+ */
+taskSchema.virtual('retrytime').get(function(){
+    let now = new Date();
+    let seconds_begin = Math.floor((now - this.begin)); // The difference between now and the last call from the agent.
+    let seconds_end = Math.floor((now - this.end)); // The difference between now and the last call from the agent.
+    let running_time = seconds_end - seconds_begin;
+    if (this.status === 499 && this.retry) {
+        return Math.floor(running_time / 1000);
+    } else {
+        return null;
+    }
+});
+
 let workflowSchema = new dao.Schema({
     identifier: String,
     name: String,
