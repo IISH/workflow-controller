@@ -16,7 +16,7 @@ module.exports = function(app, openid, users) {
     const jose = require('node-jose'); // used to parse the keystore
     const Issuer = require('openid-client').Issuer;
     const Strategy = require('openid-client').Strategy;
-    const keystore = jose.JWK.asKeyStore(openid.keystore);
+    const keystore = jose.JWK.asKeyStore(openid.keystore); // https://sometimes-react.medium.com/jwks-and-node-jose-9273f89f9a02
 
 // initialize passport here
     app.use(passport.initialize({}));

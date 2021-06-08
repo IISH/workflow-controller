@@ -23,7 +23,7 @@
     "nconf": "0.10.0",
     "npm": "^6.11.3",
     "openid-client": "^1.15.0",
-    "passport": "^0.4.0",
+    "passport": "^0.4.1",
     "pug": "2.0.4",
     "request": "2.88.0",
     "update": "^0.7.4"
