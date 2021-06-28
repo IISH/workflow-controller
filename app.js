@@ -29,13 +29,13 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 const session = require('express-session');
-const MongoStore = require('connect-mongo')(session);
+const FileStore = require('session-file-store')(session);
 
 app.use(session({
-    store: (app.get('env') === 'production') ? new MongoStore({ mongooseConnection: dao.connection }) : null,
+    store: new FileStore({}),
     secret: nconf.get('web').session_secret,
-    resave: false,
-    saveUninitialized: false
+    resave: true,
+    saveUninitialized: true
 }));
 
 const passport = require('./iaa')(app, nconf.get('openid'), nconf.get('users'));
