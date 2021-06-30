@@ -10,13 +10,15 @@
  * @param web configuration
  */
 
+const nconf = require('nconf');
+
 module.exports = function (app, passport, web) {
 
     var env = process.env.NODE_ENV;
 
     app.all('*/*', function (req, res, next) {
         if (env === 'development' || req.hostname.indexOf('.') === -1) { // E.g. localhost
-            req.user = {fullname: 'n.a.'};
+            req.user = {authorized: true, fullname: 'local user'};
             next();
         } else {
             switch (req.path) {
@@ -35,21 +37,26 @@ module.exports = function (app, passport, web) {
                             res.redirect('/denied');
                         }
                     } else {
-                        const accesstoken = web.accesstoken;
-                        if (accesstoken === req.params.accesstoken) {
-                            req.user = {authorized: true, fullname: 'api user'};
-                            next();
-                        } else {
-                            let authorization = req.headers.authorization;
-                            if (authorization) {
-                                let split = authorization.split(' ', 2); // expect "Bearer [accesstoken]"
-                                if (accesstoken === split[1]) {
-                                    req.user = {authorized: true, fullname: 'api user'};
-                                    next()
+                        let authorization = req.headers.authorization;
+                        if (authorization) {
+                            const users = nconf.get('users')
+                            let split = authorization.split(' ', 2); // expect "Bearer [accesstoken]"
+                            if ( split.length === 2 && split[0].toLowerCase() === 'bearer') {
+                                let user = users.find(function (u) {
+                                    return (u.api === split[1]);
+                                });
+                                if (user) {
+                                    req.user = {authorized: true, fullname: user.fullname, sub: user.oidc};
+                                    return next();
+                                } else {
+                                    res.status(401);
+                                    res.send();
                                 }
-                            } else {
-                                res.redirect('/login');
                             }
+                            res.status(400);
+                            res.send();
+                        } else {
+                            res.redirect('/login');
                         }
                     }
             }
