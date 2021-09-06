@@ -75,6 +75,7 @@
   },
   "workflows": {
     "helloworld": {
+      "enable": true,
       "mail_archivist_on_success": "archivist@localhost",
       "tasks": [
         {
@@ -99,7 +100,7 @@
         }
       ],
       "events": [
-        "hotfolder/helloworld"
+        "/data/hotfolder/helloworld"
       ]
     }
   }
