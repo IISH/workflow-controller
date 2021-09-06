@@ -2,6 +2,7 @@ package-lock.json
 node_modules/
 work/
 version.pug
+bin/sessions/
 
 # IDE #
 *.ipr
