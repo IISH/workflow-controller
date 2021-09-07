@@ -80,17 +80,26 @@ for (let workflow in workflows) {
 }
 
 function sent(workflow, fileset) {
-    request.post(
-        url,
-        {json: {name: workflow, fileset: fileset}},
-        function (error, response, body) {
-            if (!error && response.statusCode === 200) {
-                console.log(body)
-            } else {
-                console.error('Error with post to ' + url);
-                console.error(error);
-            }
-        });
+    fs.stat(fileset, function (e, stats) {
+        let uid = -1;
+        if (e) {
+            log.error(e);
+            uid = 0;
+        } else {
+            uid = stats.uid;
+        }
+        request.post(
+            url,
+            {json: {name: workflow, fileset: fileset, uid: uid}},
+            function (error, response, body) {
+                if (!error && response.statusCode === 200) {
+                    console.log(body)
+                } else {
+                    console.error('Error with post to ' + url);
+                    console.error(error);
+                }
+            });
+    });
 }
 
 function remove(fileset) {

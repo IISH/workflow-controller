@@ -111,6 +111,7 @@ router.post("/", (req, res) => {
 
     let fileset = req.body.fileset;
     let name = req.body.name;
+    let uid = req.body.uid;
 
     function createFlow(workflow) {
         let workflows = nconf.get('workflows');
@@ -125,6 +126,7 @@ router.post("/", (req, res) => {
             }
             let archive = (i === -1) ? accession : accession.substring(0, i);
             workflow = Workflow({
+                uid: uid,
                 identifier: Workflow.identifier(),
                 name: name,
                 status: 0,

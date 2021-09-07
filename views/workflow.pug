@@ -29,9 +29,10 @@ block content
   table(class='table table-striped')
     thead(class='thead-dark')
       tr
-        th(class='sortable' colspan='2' id='name') flow
+        th
+        th(class='sortable' id='name') flow
         th(class='sortable' id='fileset') fileset
-        th(class='sortable' id='begin') date
-        th(colspan='4') task
+        th(class='sortable' colspan='1' id='owner') owner
+        th task
     tbody(id='workflow')
       include workflow_inc

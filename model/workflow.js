@@ -3,6 +3,7 @@
  * // https://mongoosejs.com/docs/index.html
  *
  * workflow:
+ *   uid: user identifier of the user
  *   name: workflow type
  *   fileset: absolute path of the archival item. E.g. /a/b/c/d/ARCH12345.67
  *   task: list of tasks to perform
@@ -35,7 +36,10 @@
 const dao = require('./dao');
 const uuidv4 = require('uuid/v4');
 
-const ONE_MINUTE = 60 * 1000;
+const nconf = require('nconf');
+
+const SECOND = 1000;
+const ONE_MINUTE = 60 * SECOND;
 const ONE_HOUR = 60 * ONE_MINUTE;
 
 /**
@@ -59,7 +63,6 @@ let taskSchema = new dao.Schema({
  * duration = time of the task
  */
 taskSchema.virtual('duration').get(function () {
-    const SECOND = 1000;
     if (this.status === 100) {
         return '';
     }
@@ -81,7 +84,35 @@ taskSchema.virtual('retryTime').get(function(){
     return (this.status === 499 && this.retry) ? this.retry - seconds_end :0;
 });
 
+
+function formatDate(date) {
+    let year = date.getFullYear();
+    let month = ('00' + (date.getUTCMonth() + 1)).substr(-2);
+    let day = ('00' + date.getUTCDate()).substr(-2);
+    return year + '-' + month + '-' + day;
+}
+function formatTime(date) {
+    let hour = ('00' + date.getHours()).substr(-2);
+    let minute = ('00' + date.getMinutes()).substr(-2);
+    let second = ('00' + date.getSeconds()).substr(-2);
+    return hour + ':' + minute + ':' + second;
+}
+
+taskSchema.virtual('startdate').get(function(){
+    return formatDate(this.begin);
+});
+taskSchema.virtual('enddate').get(function(){
+    return formatDate(this.end);
+});
+taskSchema.virtual('starttime').get(function(){
+    return formatTime(this.begin);
+});
+taskSchema.virtual('endtime').get(function(){
+    return formatTime(this.end);
+});
+
 let workflowSchema = new dao.Schema({
+    uid: Number,
     identifier: String,
     name: String,
     fileset: {type: String, index: {unique: true, dropDups: true}},
@@ -105,6 +136,18 @@ workflowSchema.virtual('first').get(function () {
     return this.tasks.filter( function(task) {
         return task.status <= 300 ;
     }).length === this.tasks.length;
+});
+
+/**
+ * get user via the id
+ */
+workflowSchema.virtual('owner').get(function(){
+    const users = nconf.get('users');
+    let uid = this.uid;
+    let user = users.find(function (u) {
+        return (u.uid === uid);
+    });
+    return (user) ? user.fullname : uid;
 });
 
 /**
@@ -132,6 +175,8 @@ workflowSchema.virtual('duration').get(function () {
     const seconds = 1000;
     return Math.floor(Math.abs((this.end - this.begin) / seconds));
 });
+
+
 
 /**
  * task = current task is the first in the list

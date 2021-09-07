@@ -58,9 +58,13 @@
       ]
     }
   },
-  "users": {
-
-  },
+  "users": [
+    {
+      "oidc": "oidc",
+      "fullname": "fullname",
+      "uid": 1000
+    }
+  ],
   "mailer": {
     "host": "localhost",
     "port": 465,
