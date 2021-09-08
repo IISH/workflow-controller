@@ -28,3 +28,18 @@ th.sortable:hover::after {
 body {
     background-color: #ffffcc;
 }
+
+.wordwrap {
+    width: 400px;
+    word-wrap: break-word;
+}
+
+.small {
+    font-size: x-small;
+}
+
+ul.opties {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}

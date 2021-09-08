@@ -10,24 +10,33 @@ block content
   form(method='GET' class='form-inline' id='form_archive')
 
     div(class='input-group')
-      label(for='form_archive_name' class='form-check-label') Workflow types
-      select(class='custom-select' id='form_archive_name' name='form_archive_name' onchange='this.form.submit()')
-        each name in workflow_name
-          if name === form_archive_name
-            option(selected='true') #{name}
-          else
-            option #{name}
-
+      label(for='form_workflow_item' class='form-check-label') Workflow types
+      select(class='custom-select' id='form_workflow_item' name='form_workflow_item' class='filter')
+        each item in form_workflow_list
+          option #{item}
   table(class='table table-striped')
     thead(class='thead-dark')
       tr
-        th(class='sortable' id='piece') piece\archive
+        th(class='sortable' id='archive') piece\archive
         th(class='sortable' id='complete') complete
         th(class='sortable' id='running') running
         th(class='sortable' id='waiting') waiting
         th(class='sortable' id='failed') failed
         th(class='sortable' id='total') total
-        th(id='check') check
-        th(id='delete') delete report
-      tbody(id='archive')
+        th
+      tr(class='checkboxes')
+        td
+          input(type='text' name='archive' id='filter_archive' class='filter')
+        td
+          input(type='checkbox' name='complete' id='status_complete' value='2' class='filter')
+        td
+          input(type='checkbox' name='running' id='status_running' value='1' checked class='filter')
+        td
+          input(type='checkbox' name='waiting' id='status_waiting' value='0' checked class='filter')
+        td
+          input(type='checkbox' name='failed' id='status_failed' value='-1' checked class='filter')
+        td
+        td
+
+    tbody(id='tbody')
         include archive_inc

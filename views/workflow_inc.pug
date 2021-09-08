@@ -1,10 +1,10 @@
 each workflow in workflows || []
     tr
-        td
-            a(href='workflow/delete/' + workflow.identifier class='btn btn-info' role='button') Delete
         td #{workflow.name}
+            ul(class='opties')
+                a(href='workflow/delete/' + workflow.identifier class='small' role='button') Delete
         td
-            a(href='workflow/' + workflow.identifier) #{workflow.fileset}
+            a(href='workflow/' + workflow.identifier) #{workflow.filesetshort}
         td(scope='col') #{workflow.owner}
         td
             table
@@ -12,6 +12,11 @@ each workflow in workflows || []
                 each task in workflow.tasks
                     tr
                         td(scope='col') #{task.queue}
+                            ul(class='opties')
+                                li
+                                    a(href='workflow/retry/' + task.identifier + '?form_workflow_name=' + form_workflow_name class='small' role='button') Retry (#{task.retryTime})
+                                li
+                                    a(href='workflow/skip/' + task.identifier + '?form_workflow_name=' + form_workflow_name class='small' role='button') Skip
                         td(scope='col' class='wordwrap')
                             pre #{task.description}
                         td(scope='col' class={
@@ -28,8 +33,6 @@ each workflow in workflows || []
                         }[task.status]) #{task.status}
                         td(scope='col')
                             pre #{task.info}
-                        td(scope='col' class='small') #{task.startdate}<br/>#{task.starttime}
-                        td(scope='col' class='small') #{task.enddate}<br/>#{task.endtime}
-                        td(scope='col')
-                            a(href='workflow/retry/' + task.identifier + '?form_workflow_name=' + form_workflow_name class='btn btn-info' role='button') Retry (#{task.retryTime})
-                            a(href='workflow/skip/' + task.identifier + '?form_workflow_name=' + form_workflow_name class='btn btn-info' role='button') Skip
+                        td(scope='col' class='small') #{task.startdate}T#{task.starttime} #{task.enddate}T#{task.endtime}
+                    tr
+                        td(scope='col' colspan='5')

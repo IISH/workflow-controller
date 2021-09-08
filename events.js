@@ -83,7 +83,7 @@ function sent(workflow, fileset) {
     fs.stat(fileset, function (e, stats) {
         let uid = -1;
         if (e) {
-            log.error(e);
+            console.error(e);
             uid = 0;
         } else {
             uid = stats.uid;

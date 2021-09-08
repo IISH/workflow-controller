@@ -13,28 +13,32 @@ const nconf = require('nconf');
 const Workflow = require('../model/workflow');
 const amq = require('../amq');
 
-const status = {'-1': 'failed', 0: 'waiting', '1': 'running', 2: 'complete'};
+const status = {'-1': 'failed', 0: 'waiting', 1: 'running', 2: 'complete'};
 
 router.get('/', function (req, res, next) {
-    let form_archive_name = req.query.form_archive_name;
+    let form_workflow_item = req.query.form_workflow_item;
     res.render('archive', {
         title: 'archive', theme: nconf.get('web').theme,
-        workflow_name: [''].concat(Object.keys(nconf.get('workflows'))),
-        form_archive_name: form_archive_name,
+        form_workflow_list: [''].concat(Object.keys(nconf.get('workflows'))),
+        form_workflow_item: form_workflow_item,
         user: req.user.fullname
     })
 });
 
-router.get('/archive_inc', function (req, res, next) {
+router.post('/archive_inc', function (req, res, next) {
 
-    let form_archive_name = req.query.form_archive_name;
-    let query = (form_archive_name) ? {name: form_archive_name} : {};
+    let form_workflow_item = req.body.form_workflow_item;
+    let query = req.body.q || {};
 
+    let sort_field = req.body.sort_field || 'archive';
+    let _sort_order = req.body.sort_order || 'asc';
+    let sort_order = (_sort_order === 'asc' || _sort_order === '-1') ? -1 : 1;
 
     // We want a table like:
     // Archive | waiting | running | completed | failed | total
     // The datastructure is to be:
     // { archive: {waiting: a, failed: b, running: x, completed: y, total: z} }
+
     Workflow.aggregate([{
         $match: query
     }, {
@@ -42,9 +46,10 @@ router.get('/archive_inc', function (req, res, next) {
             _id: {archive: "$archive", status: "$status"},
             count: {$sum: 1}
         }
-    }], function (err, aggregate) {
+    },
+    ], function (err, aggregate) {
         if (err) return next(err);
-        let archives = aggregate.group(a => a._id.archive).map(function (d) {
+        let _aggregate = aggregate.group(a => a._id.archive).map(function (d) {
             let data = {archive: d[0]};
             let total = 0;
             d[1].forEach(function (dd) {
@@ -53,12 +58,21 @@ router.get('/archive_inc', function (req, res, next) {
             });
             data['total'] = total;
             return data;
+        }).sort((a, b) => {
+            if (a[sort_field] === undefined) a[sort_field] = 0;
+            if (b[sort_field] === undefined) b[sort_field] = 0;
+            if (a[sort_field] < b[sort_field]) return sort_order;
+            if (a[sort_field] > b[sort_field]) return -sort_order;
+            return 0;
         });
+
         res.render('archive_inc', {
-            archives: archives,
-            form_archive_name: form_archive_name,
-        })
+            archives: _aggregate,
+            form_workflow_item: form_workflow_item,
+        });
     });
+
+
 });
 
 router.param('archive', function (req, res, next, archive) {
@@ -85,7 +99,7 @@ router.get('/check/:archive', function (req, res, next) {
             let workflow = Workflow(_workflow);
             workflow.isNew = false;
             let task = workflow.tasks.find(_task => _task.queue === queue);
-            if ( task ) {
+            if (task) {
                 task.info = 'Retrying...';
                 workflow.tasks = workflow.tasks.filter(function (_task) {
                     return (_task.identifier !== task.identifier);
@@ -111,7 +125,7 @@ router.post('/check/:accession_id', function (req, res) {
         check(update.has_aip) &&
         check(update.has_dip) &&
         check(update.has_pid) &&
-        check(update.has_iiif)) ? 2: -1;
+        check(update.has_iiif)) ? 2 : -1;
     _update(query, update);
     res.status(200);
     res.end(JSON.stringify({status: 200, message: 'OK'}));

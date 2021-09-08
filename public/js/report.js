@@ -1,21 +1,22 @@
-var sort = '';
+let sort = '';
+const URL = 'workflow/report_inc';
 
-function report() {
+function tbody() {
     let form_report_status = $('#form_report_status').val() || '';
     let form_report_name = $('#form_report_name').val() || '';
     let form_workflow_name = $('#form_workflow_name').val() || '';
     $.ajax({
-        url: 'report/report_inc',
+        url: URL,
         data: {form_workflow_name: form_workflow_name, form_report_status: form_report_status, form_report_name: form_report_name, sort: sort},
         type: 'GET',
         dataType: 'html',
         success: function (data) {
-            $('#report').html(data.replace(/[\n\r]/g, '<br />'));
+            $('#tbody').html(data.replace(/[\n\r]/g, '<br />'));
             $('#heartbeat').addClass('bg-success').removeClass('bg-error').text(formatDate(new Date()));
         },
 
         error: function (xhr, status) {
-            $('#report').html('Sorry, there was a problem! Is the server up?');
+            $('#tbody').html('Sorry, there was a problem! Is the server up?');
             $('#heartbeat').addClass('bg-error').removeClass('bg-success').text('No connection...');
         },
 
@@ -28,17 +29,17 @@ function report() {
 
 function formatDate(date) {
     date = new Date(date);
-    var year = date.getFullYear();
-    var month = ('00' + (date.getUTCMonth() + 1)).substr(-2);
-    var day = ('00' + date.getUTCDate()).substr(-2);
-    var hour = ('00' + date.getHours()).substr(-2);
-    var minute = ('00' + date.getMinutes()).substr(-2);
-    var second = ('00' + date.getSeconds()).substr(-2);
+    let year = date.getFullYear();
+    let month = ('00' + (date.getUTCMonth() + 1)).substr(-2);
+    let day = ('00' + date.getUTCDate()).substr(-2);
+    let hour = ('00' + date.getHours()).substr(-2);
+    let minute = ('00' + date.getMinutes()).substr(-2);
+    let second = ('00' + date.getSeconds()).substr(-2);
     return year + '-' + month + '-' + day + 'T' + hour + ':' + minute + ':' + second;
 }
 
 function sortable() {
-    $('.sortable').click(function(){
+    $('.sortable').click(function () {
         let $this = $(this);
         let asc = $this.hasClass('asc');
         let desc = $this.hasClass('desc');
@@ -49,17 +50,17 @@ function sortable() {
         let _order = (desc || (!asc && !desc)) ? '' : '-';
         let field = $this.attr('id');
         sort = _order + field;
-        report();
+        tbody();
     });
 }
 
 $(document).ready(function () {
     sortable();
-    report();
+    tbody();
     utils();
 });
 
-setInterval(function () {
-    report();
-    utils();
-}, 5000);
+// setInterval(function () {
+//     tbody();
+//     utils();
+// }, 5000);

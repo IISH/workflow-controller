@@ -37,3 +37,24 @@ body {
 .small {
     font-size: x-small;
 }
+
+ul.opties {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+input[type=checkbox]
+{
+    /* Double-sized Checkboxes */
+    -ms-transform: scale(0.6); /* IE */
+    -moz-transform: scale(0.6); /* FF */
+    -webkit-transform: scale(0.6); /* Safari and Chrome */
+    -o-transform: scale(0.6); /* Opera */
+    transform: scale(0.6);
+}
+
+tr.checkboxes {
+    background-color: gray;
+    height: 5px;
+}

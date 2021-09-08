@@ -1,11 +1,12 @@
-var sort = '';
+let sort = '';
+const URL = 'workflow/workflow_inc';
 
-function workflow() {
+function tbody() {
     let form_workflow_identifier = $('#form_workflow_identifier').val() || '';
     let form_workflow_name = $('#form_workflow_name').val() || '';
     let form_workflow_status = $('#form_workflow_status').val() || '';
     $.ajax({
-        url: 'workflow/workflow_inc',
+        url: URL,
         data: {
             'form_workflow_name': form_workflow_name,
             form_workflow_status: form_workflow_status,
@@ -15,12 +16,12 @@ function workflow() {
         type: 'GET',
         dataType: 'html',
         success: function (data) {
-            $('#workflow').html(data.replace(/[\n\r]/g, '<br />'));
+            $('#tbody').html(data.replace(/[\n\r]/g, '<br />'));
             $('#heartbeat').addClass('bg-success').removeClass('bg-error').text(formatDate(new Date()));
         },
 
         error: function (xhr, status) {
-            $('#workflow').html('Sorry, there was a problem! Is the server up?');
+            $('#tbody').html('Sorry, there was a problem! Is the server up?');
             $('#heartbeat').addClass('bg-error').removeClass('bg-success').text('No connection...');
         },
 
@@ -33,12 +34,12 @@ function workflow() {
 
 function formatDate(date) {
     date = new Date(date);
-    var year = date.getFullYear();
-    var month = ('00' + (date.getUTCMonth() + 1)).substr(-2);
-    var day = ('00' + date.getUTCDate()).substr(-2);
-    var hour = ('00' + date.getHours()).substr(-2);
-    var minute = ('00' + date.getMinutes()).substr(-2);
-    var second = ('00' + date.getSeconds()).substr(-2);
+    let year = date.getFullYear();
+    let month = ('00' + (date.getUTCMonth() + 1)).substr(-2);
+    let day = ('00' + date.getUTCDate()).substr(-2);
+    let hour = ('00' + date.getHours()).substr(-2);
+    let minute = ('00' + date.getMinutes()).substr(-2);
+    let second = ('00' + date.getSeconds()).substr(-2);
     return year + '-' + month + '-' + day + 'T' + hour + ':' + minute + ':' + second;
 }
 
@@ -54,17 +55,17 @@ function sortable() {
         let _order = (desc || (!asc && !desc)) ? '' : '-';
         let field = $this.attr('id');
         sort = _order + field;
-        workflow();
+        tbody();
     });
 }
 
 $(document).ready(function () {
     sortable();
-    workflow();
+    tbody();
     utils();
 });
 
-setInterval(function () {
-    workflow();
-    utils();
-}, 5000);
+// setInterval(function () {
+//     tbody();
+//     utils();
+// }, 5000);

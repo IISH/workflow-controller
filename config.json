@@ -5,7 +5,8 @@
     "session_secret": "93e01642900d",
     "heartbeat": 1800000,
     "iiif": "http://localhost",
-    "manifest": "http://localhost"
+    "manifest": "http://localhost",
+    "theme": "css/production.css"
   },
   "datasource": {
     "protocol": "mongodb",
@@ -33,23 +34,6 @@
       "kid": "rsa_key",
       "alg": "RS256"
     },
-    "keystore": {
-      "keys": [
-        {
-          "kty": "RSA",
-          "kid": "rsa_key",
-          "alg": "RS256",
-          "e": "AQAB",
-          "n": "n",
-          "d": "d-slsbqqe2OAIHW6EBQEdQ0x_9aPxTavXIqqDQY-x9_xL8nvZl5yiPex8eQu9bgXxd1f9TnLnxX3YEvqznldezZ8zWff5XNE1Q0b6GNtlVyU89qJI13ekhFREyEHkegvJWKmcVHO6VAjpSGk5vESoW3sw9K7dbPAH0r4lGdictRRqj_7AEdGhOTVZ6g8V1bgQ",
-          "p": "p-j-U1h67tjME",
-          "q": "q",
-          "dp": "dp",
-          "dq": "dq",
-          "qi": "qi"
-        }
-      ]
-    },
     "strategy": {
       "redirect_uri": "http://127.0.0.1:3000/openid-connect-login",
       "scope": "openid email",
@@ -61,7 +45,7 @@
   "users": [
     {
       "oidc": "oidc",
-      "fullname": "fullname",
+      "fullname": "A name",
       "uid": 1000
     }
   ],
