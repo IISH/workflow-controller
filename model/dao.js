@@ -6,5 +6,8 @@ var nconf = require('nconf');
 var mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 let datasource = nconf.get('datasource');
-mongoose.connect(datasource.protocol + '://' + datasource.host + ':' + datasource.port + '/' + datasource.database);
+mongoose.connect(datasource.protocol + '://' + datasource.host + ':' + datasource.port + '/' + datasource.database, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+});
 module.exports = mongoose;

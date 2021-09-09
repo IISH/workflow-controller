@@ -29,6 +29,8 @@ module.exports = function (app, openid, users) {
         done(null, user);
     });
 
+    if ( openid.oidc_discover_url === undefined || openid.oidc_discover_url.indexOf('.') === -1) return passport;
+
 // discover the Issuer. returns a Promise
 //   you can also set this up manually, see the project documentation
     let discover_issuer = Issuer.discover(openid.oidc_discover_url);

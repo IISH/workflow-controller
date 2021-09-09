@@ -13,29 +13,30 @@ const nconf = require('nconf');
 const Workflow = require('../model/workflow');
 
 router.get('/', function (req, res, next) {
-    let form_workflow_name = req.query.form_workflow_name;
+    let form_workflow_item = req.query.form_workflow_item;
     let form_report_status = req.query.form_report_status;
     let form_report_name = req.query.form_report_name;
-    res.render('report', {
+    let d = {
         title: 'report', theme: nconf.get('web').theme,
         user: req.user.fullname,
-        workflow_name: [''].concat(Object.keys(nconf.get('workflows'))),
+        form_workflow_list: [''].concat(Object.keys(nconf.get('workflows'))),
         report_status: [''].concat(['Error', 'Waiting', 'Running', 'Complete']),
         form_report_status: form_report_status,
         form_report_name: form_report_name,
-        form_workflow_name: form_workflow_name
-    })
+        form_workflow_item: form_workflow_item
+    };
+    res.render('report', d);
 });
 
-router.get('/report_inc', function (req, res, next) {
+router.post('/report_inc', function (req, res, next) {
     let limit = req.params.limit || 1000;
-    let form_workflow_name = req.query.form_workflow_name;
+    let form_workflow_item = req.query.form_workflow_item;
     let form_report_name = req.query.form_report_name;
     let form_report_status = req.query.form_report_status;
     let sort = req.query.sort || 'accession';
     let query = (form_report_name) ? {archive: form_report_name} : {};
-    if (form_workflow_name) {
-        query['name'] = form_workflow_name
+    if (form_workflow_item) {
+        query['name'] = form_workflow_item
     }
 
     switch (form_report_status) {

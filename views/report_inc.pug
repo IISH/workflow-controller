@@ -1,10 +1,21 @@
+//https://www.w3schools.com/icons/icons_reference.asp
+- const icons={archivematica:'archivematica.png'}
+
 each workflow in workflows || []
     tr
         td
-          a(target='_blank' href=iiif_url + '/universalviewer/#?manifest=' + handle_url + '/' + workflow.accession + '?locatt=view:manifest')
-            img(style='height: 100px;width: 100px' src=iiif_url + '/file/' + workflow.accession)
+            - let icon=icons[workflow.name] || workflow.name + '.svg'
+            img(src='images/' + icon width='25px' style='float: left;padding-right: 5px')
+            = workflow.name
+        td
+            if workflow.name in ['order', 'download_aip', 'download_dip'] || workflow.name === 'archivematica' && workflow.status === 2
+                a(target='_blank' href=iiif_url + '/universalviewer/#?manifest=' + handle_url + '/' + workflow.accession + '?locatt=view:manifest')
+                    img(style='height: 100px;width: 100px' src=iiif_url + '/file/' + workflow.accession)
+            else
+                |
         td
           a(href='/workflow?form_workflow_identifier=' + workflow.identifier) #{workflow.accession}
+        td= workflow.owner
         td #{{'-1': 'Error', 0: 'Waiting', 1: 'Running', 2: 'Complete'}[workflow.status]}
         td #{status[workflow.has_aip]}
         td #{status[workflow.has_dip]}

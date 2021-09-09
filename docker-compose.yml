@@ -10,7 +10,7 @@ services:
       - /data/config/activemq/conf:/opt/activemq/conf
 
   mongodb:
-    image: mongo:4.0.12-xenial
+    image: mongo:4.2.15-bionic
     ports:
       - "27017:27017"
     volumes:

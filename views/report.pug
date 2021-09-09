@@ -15,29 +15,25 @@ block content
       label(for='form_report_status' class='form-check-label') Status
       select(class='custom-select' id='form_report_status' name='form_report_status' onchange='this.form.submit()')
         each status in report_status
-          if status === form_report_status
-            option(selected='true') #{status}
-          else
-            option #{status}
+          option #{status}
 
-      label(for='form_workflow_name' class='form-check-label') Workflow types
-        select(class='custom-select' id='form_workflow_name' name='form_workflow_name' onchange='this.form.submit()')
-          each name in workflow_name
-            if name === form_workflow_name
-              option(selected='true') #{name}
-            else
-              option #{name}
+      label(for='form_workflow_item' class='form-check-label') Workflow types
+        select(class='custom-select filter' id='form_workflow_item' name='form_workflow_item')
+          each item in form_workflow_list
+            option #{item}
 
   table(class='table table-striped')
     thead(class='thead-dark')
       tr
-        th sample
+        th
         th(class='sortable' id='accession') accession
+        th(class='sortable' id='owner') owner
+        th(class='sortable' id='workflow') workflow
         th(class='sortable' id='status') status
         th(class='sortable' id='has_aip') aip
         th(class='sortable' id='has_dip') dip
         th(class='sortable' id='has_pid') pid
         th(class='sortable' id='has_iiif') iiif
-        th(id='delete') delete
+        th
     tbody(id='tbody')
       include report_inc
