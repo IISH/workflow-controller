@@ -21,7 +21,7 @@ module.exports = function(workflow) {
                 workflow.task.begin = new Date();
                 workflow.task.status = 200;
             } else {
-                console.error(body);
+                console.error(error);
                 workflow.task.info = body;
                 workflow.task.status = 150;
             }

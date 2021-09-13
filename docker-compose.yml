@@ -24,21 +24,12 @@ services:
     depends_on:
       - "activemq"
     volumes:
-      - /data/aip:/data/aip:ro
-      - /data/dip:/data/dip:ro
-      - /data/workflow2/Backup:/data/backup
-      - /data/workflow2/Ingest:/data/ingest
-      - /data/workflow2/Orders:/data/order
-      - /data/workflow2/.Pipeline:/data/pipeline
-      - /data/workflow2/Recovery:/data/recovery
-      - /data/workflow2/Sorting:/data/sorting
-      - /data/workflow2/.Hotfolder/iiif:/data/iiif:ro
-      - /data/helloworld:/data/helloworld:ro
+      - /data/workflow:/data/workflow:ro
       - /data/config/pmq-agent:/opt/pmq-agent:ro
       - /data/config/pmq-agent/ssh_config:/home/jenkins/.ssh/config:ro
       - /data/config/pmq-agent/ssh_config:/root/.ssh/config:ro
     environment:
       - CONFIG_FILE=/opt/pmq-agent/application.properties
       - MESSAGE_QUEUES=/opt/pmq-agent/queues_enabled
-      - WORKFLOW_ENDPOINT=http://workflow-controller:3000
+      - WORKFLOW_ENDPOINT=http://localhost:3000
       - WORKFLOW_ENDPOINT_TOKEN=5bef64ce-de9e-11e9-982a-e7c54cc02556

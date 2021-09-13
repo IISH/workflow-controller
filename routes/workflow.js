@@ -16,7 +16,8 @@ const path = require('path');
 const amq = require('../amq');
 const fs = require('fs');
 
-const ONE_MINUTE = 60 * 1000;
+const ONE_SECOND = 1000; // one second is 1000 milliseconds
+const ONE_MINUTE = 60 * ONE_SECOND;
 const THREE_MINUTES = 3 * ONE_MINUTE;
 const ONE_HOUR = 60 * ONE_MINUTE;
 
@@ -208,9 +209,9 @@ function parse(_text) {
 
 function status(workflow) {
     workflow.isNew = false;
-    let now = new Date();
 
-    let seconds_begin = Math.floor((now - workflow.task.begin)); // The difference between now and the last call from the agent.
+    let now = new Date();
+    let seconds_begin = Math.floor((now - workflow.task.begin)); // The difference between now and the moment of the first call from the agent.
     let seconds_end = Math.floor((now - workflow.task.end)); // The difference between now and the last call from the agent.
 
     console.log("Workflow status " + workflow.fileset + ':' + workflow.task.queue + ':' + workflow.task.status + ':' + workflow.task.retry + ':' + seconds_begin + ':' + seconds_end + ':' + workflow.task.retryTime);
@@ -300,6 +301,7 @@ function status(workflow) {
 }
 
 // see if we are not stale or failed. If so retry
+// Een heartbeat
 let run_heartbeat = 0;
 router.put('/heartbeat', function (req, res) {
     res.setHeader('Content-Type', 'application/json');
@@ -311,7 +313,7 @@ router.put('/heartbeat', function (req, res) {
 
     if ( run_heartbeat++ !== 1 ) {
         res.status(200);
-        res.end(JSON.stringify({status: 200, message: 'Still running heartbeat... ' + run_heartbeat}));
+        res.end(JSON.stringify({status: 200, message: 'Still running a routine to detect stale messages... ' + run_heartbeat}));
         return;
     }
 

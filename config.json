@@ -10,13 +10,13 @@
   },
   "datasource": {
     "protocol": "mongodb",
-    "host": "mongodb",
+    "host": "localhost",
     "port": 27017,
     "database": "test"
   },
   "amq": {
     "protocol": "http",
-    "host": "activemq",
+    "host": "localhost",
     "port": 8161,
     "username": "agent",
     "password": "7325a38d6072"
@@ -68,23 +68,23 @@
       "tasks": [
         {
           "description": "Say 'hello world 1'",
-          "queue": "hello_world_1"
+          "queue": "hello_world_10"
         },
         {
           "description": "Say 'hello world 2'",
-          "queue": "hello_world_2"
+          "queue": "hello_world_20"
         },
         {
           "description": "Say 'hello world 3'",
-          "queue": "hello_world_3"
+          "queue": "hello_world_30"
         },
         {
           "description": "Say 'hello world 4'",
-          "queue": "hello_world_4"
+          "queue": "hello_world_40"
         },
         {
           "description": "Say 'hello world 5'",
-          "queue": "hello_world_5"
+          "queue": "hello_world_50"
         }
       ],
       "events": [

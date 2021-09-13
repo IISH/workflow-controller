@@ -2,9 +2,11 @@
 - const icons={archivematica:'archivematica.png'}
 
 each workflow in workflows || []
+    - let icon=icons[workflow.name] || workflow.name + '.svg'
     tr
         td
-            - let icon=icons[workflow.name] || workflow.name + '.svg'
+            workflow.starttime
+        td
             img(src='images/' + icon width='25px' style='float: left;padding-right: 5px')
             = workflow.name
         td
