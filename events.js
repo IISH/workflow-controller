@@ -21,55 +21,52 @@ const request = require('request');
 const url = nconf.get('web').endpoint + '/workflow';
 const extension = ['.txt', '.csv'];
 const systemfile = ['new folder', 'tmp', 'temp', 'work'];
-const Workflow2 = require('./model/workflow');
+const Workflow = require('./model/workflow');
 
 const workflows = nconf.get('workflows');
 
-const timeoutReloadHotfolder = 10*60*1000;
-let heartbeatReloadHotfolder = nconf.get('web').heartbeatReloadHotfolder || timeoutReloadHotfolder;
+const ONE_MINUTE = 10 * 60 * 1000;
+let heartbeatReloadHotfolder = nconf.get('web').heartbeatReloadHotfolder || ONE_MINUTE;
 console.info('HeartbeatReloadHotfolder interval is ' + heartbeatReloadHotfolder);
 const reloadHotfolder = function () {
-//    const workflows = nconf.get('workflows');
     for (let workflow in workflows) {
         if (workflows.hasOwnProperty(workflow)) {
             let flow = workflows[workflow];
             if (flow.enable === true) {
-                let hotfolders = flow.events;
+                let hotfolders = flow.events.map(f => path.resolve(f)); // naar absoluut pad.
                 console.log("Watching fs events for workflow:" + workflow + " in hotfolders: " + hotfolders);
 
                 console.log('RELOAD hotfolder ' + Date.now())
                 const fs = require('fs');
-                fs.readdir(hotfolders[0], (err, files) => {
-                    if (err) {
-                        console.log(err);
-                    } else {
-                        files.forEach(file => {
-                            if ( fs.lstatSync( hotfolders[0]+'/'+file ).isDirectory() ) {
-                                addDir(workflow, hotfolders[0]+'/'+file);
-                            } else {
-                                addFile(workflow, hotfolders[0]+'/'+file, false);
-                            }
-                        })
-                    }
-                })
+                hotfolders.each(function(hotfolder){
+                    fs.readdir(hotfolder, (err, files) => {
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            files.forEach(file => {
+                                if (fs.lstatSync(hotfolder + '/' + file).isDirectory()) {
+                                    addDir(workflow, hotfolder + '/' + file);
+                                } else {
+                                    addFile(workflow, hotfolder + '/' + file, false);
+                                }
+                            })
+                        }
+                    })
 
+                });
             } else {
                 console.log('Ignoring disabled workflow ' + workflow);
             }
         }
     }
 };
-// run at startup
-reloadHotfolder()
-// set reload interval
-setInterval(reloadHotfolder, heartbeatReloadHotfolder);
 
 //const workflows = nconf.get('workflows');
 for (let workflow in workflows) {
     if (workflows.hasOwnProperty(workflow)) {
         let flow = workflows[workflow];
         if (flow.enable === true) {
-            let hotfolders = flow.events;
+            let hotfolders = flow.events.map(f => path.resolve(f)); // naar absoluut pad.
             console.log("Watching fs events for workflow:" + workflow + " in hotfolders: " + hotfolders);
 
             let fsWatcher = chokidar.watch(hotfolders, {
@@ -127,12 +124,11 @@ function remove(fileset) {
 function addDir(workflow, fileset) {
     let accession = path.basename(fileset);
     if (!systemfile.includes(accession.toLowerCase())) {
-        Workflow2.findOne({'fileset': fileset}, function (err, resWorkflow) {
+        Workflow.findOne({'fileset': fileset}, function (err, resWorkflow) {
             if (err) {
-                console.log ('MONGODB fileset: ' + fileset + ' ERROR: ' + err)
+                console.log('MONGODB fileset: ' + fileset + ' ERROR: ' + err)
             } else if (!resWorkflow) {
                 console.log('MONGODB RECORD NOT FOUND ' + fileset)
-//                addDir(workflow, hotfolders[0]+'/'+file);
                 console.log('DIRECTORY ADDED: ' + fileset);
                 sent(workflow, fileset);
             } else {
@@ -184,7 +180,7 @@ function addFile(workflow, filename, triggeredByFsWatcher) {
                             // de service ziet wel een lijst, maakt nieuwe directories aan
                             // maar de nieuwe directories triggeren geen fswatcher event (addDir)
                             // oplossing: indien gevonden bij service start doe dan 'handmatig' de addDir (omdat fsWatcher het event niet ziet)
-                            if ( !triggeredByFsWatcher ) {
+                            if (!triggeredByFsWatcher) {
                                 console.log('START HIER ADD DIR: ' + fileset)
                                 addDir(workflow, fileset);
                             }
@@ -221,5 +217,9 @@ const stale = function () {
         }
     );
 };
-
 setInterval(stale, heartbeat);
+
+// run at startup
+reloadHotfolder()
+// set reload interval
+setInterval(reloadHotfolder, heartbeatReloadHotfolder);
