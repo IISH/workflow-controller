@@ -46,10 +46,13 @@ const reloadHotfolder = function () {
                         console.log(err);
                     } else {
                         files.forEach(file => {
-                            if ( fs.lstatSync( hotfolders[0]+'/'+file ).isDirectory() ) {
-                                addDir(workflow, hotfolders[0]+'/'+file);
-                            } else {
-                                addFile(workflow, hotfolders[0]+'/'+file, false);
+                            if ( file.charAt(0) !== '.' ) {
+                                console.log('JUST DO IT');
+                                if ( fs.lstatSync( hotfolders[0]+'/'+file ).isDirectory() ) {
+                                    addDir(workflow, hotfolders[0]+'/'+file);
+                                } else {
+                                    addFile(workflow, hotfolders[0]+'/'+file, false);
+                                }
                             }
                         })
                     }
@@ -138,12 +141,8 @@ function addDir(workflow, fileset) {
 //                addDir(workflow, hotfolders[0]+'/'+file);
                 console.log('DIRECTORY ADDED: ' + fileset);
                 sent(workflow, fileset);
-            } else {
-                console.log('SKIPPING MONGODB ' + fileset);
             }
         });
-
-
     }
 }
 
@@ -168,6 +167,9 @@ function addFile(workflow, filename, triggeredByFsWatcher) {
                     return element.length !== 0 && array.indexOf(element) === index;
                 })
                 .forEach(function (identifier) {
+                    if ( identifier.charAt(0) !== '.' ) {
+                        console.log('JUST DO IT');
+
                         let fileset = hotfolder + '/' + identifier;
                         try {
                             //
@@ -195,7 +197,7 @@ function addFile(workflow, filename, triggeredByFsWatcher) {
                             console.warn(err);
                         }
                     }
-                );
+                });
             fs.unlink(filename, function (err) {
                 if (err) {
                     console.log(err);
