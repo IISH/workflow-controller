@@ -1,12 +1,17 @@
 #!/bin/bash
 #
-# hello_world_3/startup.sh
+# hello_world_30/startup.sh
 
-#
 source "${MESSAGE_QUEUES}/settings.sh"
 
+# greeting
+function greeting() {
+  echo "Hello world ${1} on $(date)"
+  sleep 1
+}
+
 function main() {
-    echo "Hello world 3 on $(date)"
+    	greeting "$IDENTIFIER"
 }
 
 main

@@ -1,5 +1,5 @@
 each archive in archives || []
-    tr
+    tr(class='small')
         td
             a(href='/report?form_report_name=' + archive.archive) #{archive.archive}
         td #{archive.complete||0}

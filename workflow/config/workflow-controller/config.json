@@ -4,7 +4,8 @@
     "endpoint": "http://localhost:3000",
     "session_secret": "93e01642900d",
     "heartbeat": 10000,
-    "iiif": "http://localhost",
+    "iiif_url": "https://access.iisg.amsterdam/universalviewer",
+    "handle_url": "https://hdl.handle.net/10622",
     "manifest": "http://localhost",
     "theme": "css/production.css"
   },

@@ -73,7 +73,7 @@ $(document).ready(function () {
     utils();
 });
 
-// setInterval(function () {
-//     tbody();
-//     utils();
-// }, 5000);
+setInterval(function () {
+    tbody();
+    utils();
+}, 10000);

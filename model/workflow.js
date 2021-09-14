@@ -98,6 +98,10 @@ function formatTime(date) {
     return hour + ':' + minute + ':' + second;
 }
 
+function formatDateTime(date) {
+    return formatDate(date) + 'T' + formatTime(date) + 'Z';
+}
+
 taskSchema.virtual('startdate').get(function(){
     return formatDate(this.begin);
 });
@@ -127,6 +131,11 @@ let workflowSchema = new dao.Schema({
     has_dip: {type: Number, default: 0},
     has_iiif: {type: Number, default: 0},
     has_pid: {type: Number, default: 0}
+});
+
+workflowSchema.virtual('datetime').get(function(){
+    let date = (this.begin < this.end) ? this.end : this.begin;
+    return formatDateTime(date);
 });
 
 /**

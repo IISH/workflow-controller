@@ -35,6 +35,10 @@ body {
 }
 
 .small {
+    font-size: small;
+}
+
+.smaller {
     font-size: x-small;
 }
 
