@@ -21,14 +21,57 @@ const request = require('request');
 const url = nconf.get('web').endpoint + '/workflow';
 const extension = ['.txt', '.csv'];
 const systemfile = ['new folder', 'tmp', 'temp', 'work'];
+const Workflow2 = require('./model/workflow');
 
 const workflows = nconf.get('workflows');
+
+const timeoutReloadHotfolder = 10*60*1000;
+let heartbeatReloadHotfolder = nconf.get('web').heartbeatReloadHotfolder || timeoutReloadHotfolder;
+console.info('HeartbeatReloadHotfolder interval is ' + heartbeatReloadHotfolder);
+const reloadHotfolder = function () {
+//    const workflows = nconf.get('workflows');
+    for (let workflow in workflows) {
+        if (workflows.hasOwnProperty(workflow)) {
+            let flow = workflows[workflow];
+            if (flow.enable === true) {
+                let hotfolders = flow.events;
+                console.log("Watching fs events for workflow:" + workflow + " in hotfolders: " + hotfolders);
+
+                console.log('RELOAD hotfolder ' + Date.now())
+                const fs = require('fs');
+                fs.readdir(hotfolders[0], (err, files) => {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        files.forEach(file => {
+                            if ( fs.lstatSync( hotfolders[0]+'/'+file ).isDirectory() ) {
+                                addDir(workflow, hotfolders[0]+'/'+file);
+                            } else {
+                                addFile(workflow, hotfolders[0]+'/'+file, false);
+                            }
+                        })
+                    }
+                })
+
+            } else {
+                console.log('Ignoring disabled workflow ' + workflow);
+            }
+        }
+    }
+};
+// run at startup
+reloadHotfolder()
+// set reload interval
+setInterval(reloadHotfolder, heartbeatReloadHotfolder);
+
+//const workflows = nconf.get('workflows');
 for (let workflow in workflows) {
     if (workflows.hasOwnProperty(workflow)) {
         let flow = workflows[workflow];
         if (flow.enable === true) {
             let hotfolders = flow.events;
             console.log("Watching fs events for workflow:" + workflow + " in hotfolders: " + hotfolders);
+
             let fsWatcher = chokidar.watch(hotfolders, {
                 depth: 0,
                 ignored: /(^|[\/\\])\../,
@@ -36,43 +79,18 @@ for (let workflow in workflows) {
                 interval: 3000,
                 usePolling: true
             });
+
             fsWatcher
                 .on('unlinkDir', (fileset) => {
                     remove(fileset);
                 })
                 .on('addDir', (fileset) => {
-                    let accession = path.basename(fileset);
-                    if (!systemfile.includes(accession.toLowerCase())) {
-                        sent(workflow, fileset);
-                    }
+                    addDir(workflow, fileset);
                 })
                 .on('add', (filename) => {
-                    let extname = path.extname(filename).toLowerCase();
-                    if (extension.includes(extname)) {
-                        let hotfolder = path.dirname(filename);
-                        fs.readFileSync(filename, "utf8").split("\n")
-                            .map(element => element.trim())
-                            .filter(function (element, index, array) {
-                                return element.length !== 0 && array.indexOf(element) === index;
-                            })
-                            .forEach(function (identifier) {
-                                    let fileset = hotfolder + '/' + identifier;
-                                    try {
-                                        fs.mkdirSync(fileset, {recursive: false});
-                                        console.log('Fileset added: ' + fileset);
-                                    } catch (err) {
-                                        console.warn(err);
-                                    }
-                                }
-                            );
-                        fs.unlink(filename, function (err) {
-                            if (err) {
-                                console.log(err);
-                            }
-                            console.log('File removed: ' + filename);
-                        });
-                    }
+                    addFile(workflow, filename, true);
                 });
+
         } else {
             console.log('Ignoring disabled workflow ' + workflow);
         }
@@ -83,7 +101,7 @@ function sent(workflow, fileset) {
     fs.stat(fileset, function (e, stats) {
         let uid = -1;
         if (e) {
-            log.error(e);
+            console.error(e);
             uid = 0;
         } else {
             uid = stats.uid;
@@ -106,6 +124,84 @@ function remove(fileset) {
     console.log("workflow removal not implemented: " + fileset);
 }
 
+function addDir(workflow, fileset) {
+    let accession = path.basename(fileset);
+    if (!systemfile.includes(accession.toLowerCase())) {
+        Workflow2.findOne({'fileset': fileset}, function (err, resWorkflow) {
+            if (err) {
+                console.log ('MONGODB fileset: ' + fileset + ' ERROR: ' + err)
+            } else if (!resWorkflow) {
+                console.log('MONGODB RECORD NOT FOUND ' + fileset)
+//                addDir(workflow, hotfolders[0]+'/'+file);
+                console.log('DIRECTORY ADDED: ' + fileset);
+                sent(workflow, fileset);
+            } else {
+                console.log('SKIPPING MONGODB ' + fileset);
+            }
+        });
+
+
+    }
+}
+
+function addFile(workflow, filename, triggeredByFsWatcher) {
+    console.log('ADDFILE: ' + filename)
+
+    fs.stat(filename, function (e, stats) {
+        let uid = 0;
+
+        if (e) {
+            console.error(e);
+        } else {
+            uid = stats.uid;
+        }
+
+        let extname = path.extname(filename).toLowerCase();
+        if (extension.includes(extname)) {
+            let hotfolder = path.dirname(filename);
+            fs.readFileSync(filename, "utf8").split("\n")
+                .map(element => element.trim())
+                .filter(function (element, index, array) {
+                    return element.length !== 0 && array.indexOf(element) === index;
+                })
+                .forEach(function (identifier) {
+                        let fileset = hotfolder + '/' + identifier;
+                        try {
+                            //
+                            fs.mkdirSync(fileset, {recursive: false});
+                            fs.chown(fileset, uid, uid, (error) => {
+                                if (error)
+                                    console.log("Error setting file: " + fileset + " - uid: " + uid + " - error: ", error);
+                            });
+
+                            console.log('Fileset added: ' + fileset);
+                            console.log('DIT TRIGGERT GEEN FSWATCHER ALS FILE AANGEMAAKT IS WANNEER SERVICE DOWN WAS !!!')
+
+                            // vreemd probleem
+                            // indien proces draait en je maakt een lijst met records dan worden directories meteen aangemaakt
+                            // dat ziet fswatcher en er worden meteen records aangemaakt in mongodb
+                            // maar als je een lijst aanmaakt terwijl de service offline is, en daarna de service weer opstart
+                            // de service ziet wel een lijst, maakt nieuwe directories aan
+                            // maar de nieuwe directories triggeren geen fswatcher event (addDir)
+                            // oplossing: indien gevonden bij service start doe dan 'handmatig' de addDir (omdat fsWatcher het event niet ziet)
+                            if ( !triggeredByFsWatcher ) {
+                                console.log('START HIER ADD DIR: ' + fileset)
+                                addDir(workflow, fileset);
+                            }
+                        } catch (err) {
+                            console.warn(err);
+                        }
+                    }
+                );
+            fs.unlink(filename, function (err) {
+                if (err) {
+                    console.log(err);
+                }
+                console.log('File removed: ' + filename);
+            });
+        }
+    });
+}
 
 // Database check to recover from stale, failed or lost messages.
 const timeout = 10000;
