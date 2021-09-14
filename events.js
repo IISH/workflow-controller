@@ -27,7 +27,7 @@ for (let workflow in workflows) {
     if (workflows.hasOwnProperty(workflow)) {
         let flow = workflows[workflow];
         if (flow.enable === true) {
-            let hotfolders = flow.events;
+            let hotfolders = flow.events.map(f => path.resolve(f)); // naar absoluut pad.
             console.log("Watching fs events for workflow:" + workflow + " in hotfolders: " + hotfolders);
             let fsWatcher = chokidar.watch(hotfolders, {
                 depth: 0,

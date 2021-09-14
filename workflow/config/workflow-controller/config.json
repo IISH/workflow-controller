@@ -3,7 +3,7 @@
     "accesstoken": "12345",
     "endpoint": "http://localhost:3000",
     "session_secret": "93e01642900d",
-    "heartbeat": 1800000,
+    "heartbeat": 10000,
     "iiif": "http://localhost",
     "manifest": "http://localhost",
     "theme": "css/production.css"
@@ -19,7 +19,7 @@
     "host": "localhost",
     "port": 8161,
     "username": "agent",
-    "password": "7325a38d6072"
+    "password": "12345"
   },
   "openid": {
     "client_params": {
@@ -64,7 +64,7 @@
   "workflows": {
     "helloworld": {
       "enable": true,
-      "mail_archivist_on_success": "archivist@localhost",
+      "delete_on_success": true,
       "tasks": [
         {
           "description": "Say 'hello world 1'",
@@ -88,7 +88,7 @@
         }
       ],
       "events": [
-        "/data/hotfolder/helloworld"
+        "../workflow/Hotfolders/helloworld"
       ]
     }
   }

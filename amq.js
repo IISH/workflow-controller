@@ -19,14 +19,16 @@ module.exports = function(workflow) {
                 console.log(body);
                 workflow.task.info = 'send to queue';
                 workflow.task.begin = new Date();
+                workflow.task.end = new Date();
                 workflow.task.status = 200;
+                save(workflow);
             } else {
                 console.error(error);
                 workflow.task.info = body;
                 workflow.task.status = 150;
+                save(workflow);
             }
         }
     ).auth(amq.username, amq.password, false);
-    save(workflow);
 }
 

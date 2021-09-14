@@ -3,7 +3,7 @@ LABEL Description="Workflow controller" Version="1.0.8"
 
 COPY . /home/node
 
-RUN rm -rf /home/node/.git
+RUN rm -rf /home/node/.git /home/node/config /home/node/.gitignore /home/node/bin/sessions
 
 WORKDIR /home/node
 

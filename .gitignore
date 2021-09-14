@@ -3,6 +3,8 @@ node_modules/
 work/
 version.pug
 bin/sessions/
+db/
+helloworld/
 
 # IDE #
 *.ipr

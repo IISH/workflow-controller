@@ -214,7 +214,14 @@ function status(workflow) {
     let seconds_begin = Math.floor((now - workflow.task.begin)); // The difference between now and the moment of the first call from the agent.
     let seconds_end = Math.floor((now - workflow.task.end)); // The difference between now and the last call from the agent.
 
-    console.log("Workflow status " + workflow.fileset + ':' + workflow.task.queue + ':' + workflow.task.status + ':' + workflow.task.retry + ':' + seconds_begin + ':' + seconds_end + ':' + workflow.task.retryTime);
+    console.log('Workflow status: {'
+        + 'fileset:' + workflow.fileset
+        + ', queue:' + workflow.task.queue
+        + ', status:' + workflow.task.status
+        + ', begin:' + seconds_begin
+        + ', end:' + seconds_end
+        + ', retryTime:' + workflow.task.retryTime
+        + '}');
     switch (workflow.task.status) {
         case 100:
         case 150:
@@ -243,10 +250,11 @@ function status(workflow) {
             break;
         case 350:
             workflow.status = 1;
+            workflow.task.status = 360;
             save(workflow);
             break;
         case 360: // StatusCodeTaskWorking from agent
-            if (seconds_end > THREE_MINUTES) { // For time no response yet?
+            if (seconds_end > ONE_MINUTE) { // For time no response yet?
                 console.log("No response from agent. Is the agent offline or busy? Task: " + workflow.task.queue);
                 amq(workflow);
             } else {
@@ -282,8 +290,16 @@ function status(workflow) {
         case 600:
             if (workflow.complete) {
                 if (workflow.delete_on_success) {
-                    console.log("Delete workflow " + workflow.task.queue);
+                    console.log("Delete completed workflow " + workflow.task.queue);
+                    let fileset = workflow.fileset;
                     workflow.delete();
+                    fs.rmdir(fileset, {recursive: false, force: false}, (err) => {
+                        if (err) {
+                            // it may fail.
+                        } else {
+                            console.log(`${fileset} folder is deleted.`);
+                        }
+                    });
                 } else {
                     console.log("Completed workflow " + workflow.task.queue);
                     workflow.status = 2; // this will move the document to another collection.
@@ -306,14 +322,12 @@ let run_heartbeat = 0;
 router.put('/heartbeat', function (req, res) {
     res.setHeader('Content-Type', 'application/json');
 
-    if ( run_heartbeat > 10) { // odd.... remove lock
-        console.log("Remove hearbeat lock.");
-        run_heartbeat = 0;
-    }
-
-    if ( run_heartbeat++ !== 1 ) {
+    if (run_heartbeat++ > 1 && run_heartbeat< 10) {
         res.status(200);
-        res.end(JSON.stringify({status: 200, message: 'Still running a routine to detect stale messages... ' + run_heartbeat}));
+        res.end(JSON.stringify({
+            status: 200,
+            message: 'Still running a routine to detect stale messages... ' + run_heartbeat
+        }));
         return;
     }
 
@@ -321,31 +335,21 @@ router.put('/heartbeat', function (req, res) {
     let statuschecked = []; // something to report
     let deleted = []; // something to delete
 
-    Workflow.find().stream()
-        .on('error', function (err) {
-            res.status(500);
-            res.end(JSON.stringify({status: 500, message: err}));
-        })
-        .on('data', function (workflow) {
-
+    async function find(query) {
+        for await (const workflow of Workflow.find(query)) {
             statuschecked.push(workflow.fileset);
             let _workflow = Workflow(workflow);
-            if (fs.existsSync(workflow.fileset)) {
-                console.log("Heartbeat status check for workflow " + workflow.fileset);
-                status(_workflow);
-            } else {
-                if ( workflow.complete === false && workflow.task.status !== 499 || workflow.delete_on_success) {
-                    console.log("Fileset no longer on filesystem. Removing workflow " + workflow.fileset);
-                    deleted.push(workflow.fileset);
-                    _workflow.delete();
-                }
-            }
-        });
+            deleted.push(workflow.fileset);
+            status(_workflow);
+        }
+    }
+
+    find({$or:[{status: 0}, {status: 1}]});
 
     run_heartbeat = 0;
 
     res.status(200);
-    res.end(JSON.stringify({status: 200, message: {statuschecked:statuschecked, deleted: deleted}}));
+    res.end(JSON.stringify({status: 200, message: {statuschecked: statuschecked, deleted: deleted}}));
 });
 
 router.post('/queue/:identifier', function (req, res) {
@@ -436,7 +440,7 @@ function send_mail(workflow, subject, has_error) {
 }
 
 async function save(workflow) {
-    await workflow.save();
+    await workflow.save(); // The await keyword allows you to block the code execution until the result of a promise.
 }
 
 module.exports = router;

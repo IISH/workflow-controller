@@ -2,34 +2,35 @@ version: "2"
 services:
   activemq:
     image: rmohr/activemq:5.15.9
+    network_mode: host
     restart: always
     ports:
       - "61616:61616"
       - "8161:8161"
     volumes:
-      - /data/config/activemq/conf:/opt/activemq/conf
+      - ./workflow/config/activemq/conf:/opt/activemq/conf
 
   mongodb:
     image: mongo:4.2.15-bionic
+    network_mode: host
     ports:
       - "27017:27017"
     volumes:
-      - /data/config/mongodb/configdb:/data/configdb
-      - /data/config/mongodb/db:/data/db
+      - ./workflow/config/mongodb/configdb:/data/configdb
+      - ./workflow/config/mongodb/db:/data/db
 
-  pmq-agent-1:
+  pmq-agent:
     image: registry.diginfra.net/lwo/pmq-agent:latest
+    network_mode: host
     restart: always
     user: root
     depends_on:
       - "activemq"
     volumes:
-      - /data/workflow:/data/workflow:ro
-      - /data/config/pmq-agent:/opt/pmq-agent:ro
-      - /data/config/pmq-agent/ssh_config:/home/jenkins/.ssh/config:ro
-      - /data/config/pmq-agent/ssh_config:/root/.ssh/config:ro
+      - ./workflow/Hotfolders:/data/workflow:ro
+      - ./workflow/config/pmq-agent:/opt/pmq-agent:ro
     environment:
       - CONFIG_FILE=/opt/pmq-agent/application.properties
       - MESSAGE_QUEUES=/opt/pmq-agent/queues_enabled
       - WORKFLOW_ENDPOINT=http://localhost:3000
-      - WORKFLOW_ENDPOINT_TOKEN=5bef64ce-de9e-11e9-982a-e7c54cc02556
+      - WORKFLOW_ENDPOINT_TOKEN=12345
