@@ -4,6 +4,7 @@ work/
 version.pug
 bin/sessions/
 db/
+config2
 
 # IDE #
 *.ipr

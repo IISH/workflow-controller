@@ -271,6 +271,7 @@ function status(workflow) {
             workflow.status = -1;
             workflow.task.status = 499;
             workflow.task.retry = (has_error) ? workflow.task.retry : 0;
+            console.log("FOUT: " + workflow.task.info)
             save(workflow);
             send_mail(workflow, 'Fail', has_error);
             break;
