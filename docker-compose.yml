@@ -20,7 +20,7 @@ services:
       - ./workflow/config/mongodb/db:/data/db
 
   pmq-agent:
-    image: registry.diginfra.net/lwo/pmq-agent:latest
+    image: registry.diginfra.net/lwo/pmq-agent:3.0.12
     network_mode: host
     restart: always
     user: root

@@ -5,7 +5,7 @@ const nconf = require('nconf');
 nconf
     .argv()
     .env({separator: '_', lowerCase: true})
-    .file({file: process.env.CONFIG_FILE || '../config.json'});
+    .file({file: process.env.CONFIG_FILE || '../workflow/config/controller/config.json'});
 
 /**
  * Module dependencies.

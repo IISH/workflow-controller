@@ -58,3 +58,17 @@ And monitors a hotfolder: '/data/helloworld'
 For each queue in the config.json@workflows.name.tasks.queue element, there is a corresponding bash queues/queuename/startup.sh script.
 
 [Agent on github](https://github.com/IISH/workflow-pmq-agent)
+
+## Run the controller
+
+First startup the surrounding stack with docker-compose:
+
+    docker-compose up
+
+Then run the idea:
+
+    nodejs bin/wwwworkflow/config/controller/config.json
+
+with the environmental variable pointing to the configuration file:
+
+    CONFIG_FILE=../workflow/config/controller/config.json

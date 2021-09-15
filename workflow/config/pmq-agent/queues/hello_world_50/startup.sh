@@ -7,7 +7,7 @@ source "${MESSAGE_QUEUES}/settings.sh"
 # greeting
 function greeting() {
   echo "Hello world ${1} on $(date)"
-  sleep 1
+  sleep 10000
 }
 
 function main() {

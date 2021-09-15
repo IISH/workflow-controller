@@ -40,6 +40,7 @@ const nconf = require('nconf');
 
 const SECOND = 1000;
 const ONE_MINUTE = 60 * SECOND;
+const FIVE_MINUTES = 5 * ONE_MINUTE;
 const ONE_HOUR = 60 * ONE_MINUTE;
 
 /**
@@ -56,7 +57,7 @@ let taskSchema = new dao.Schema({
     info: {type: String, default: 'Waiting its turn'},
     description: String,
     order: Number,
-    retry: {type: Number, default: ONE_HOUR}
+    retry: {type: Number, default: ONE_MINUTE}
 }, { _id: false });
 
 /**
@@ -81,7 +82,7 @@ taskSchema.virtual('duration').get(function () {
 taskSchema.virtual('retryTime').get(function(){
     let now = new Date();
     let seconds_end = now - this.end;
-    return (this.status === 499 && this.retry) ? this.retry - seconds_end :0;
+    return (this.retry) ? this.retry - seconds_end : 0;
 });
 
 

@@ -35,7 +35,7 @@ const reloadHotfolder = function () {
                 let hotfolders = flow.events.map(f => path.resolve(f)); // naar absoluut pad.
                 console.log("Watching fs events for workflow:" + workflow + " in hotfolders: " + hotfolders);
 
-                console.log('RELOAD hotfolder ' + Date.now())
+                console.log('RELOAD hotfolder ' + new Date());
                 for (let _hotfolder in hotfolders) {
                     if (hotfolders.hasOwnProperty(_hotfolder)) {
                         let hotfolder = hotfolders[_hotfolder];
@@ -44,10 +44,12 @@ const reloadHotfolder = function () {
                                 console.log(err);
                             } else {
                                 files.forEach(file => {
-                                    if (fs.lstatSync(hotfolder + '/' + file).isDirectory()) {
-                                        addDir(workflow, hotfolder + '/' + file);
-                                    } else {
-                                        addFile(workflow, hotfolder + '/' + file, false);
+                                    if (file.charAt(0) !== '.') {
+                                        if (fs.lstatSync(hotfolder + '/' + file).isDirectory()) {
+                                            addDir(workflow, hotfolder + '/' + file);
+                                        } else {
+                                            addFile(workflow, hotfolder + '/' + file, false);
+                                        }
                                     }
                                 })
                             }
@@ -130,12 +132,8 @@ function addDir(workflow, fileset) {
                 console.log('MONGODB RECORD NOT FOUND ' + fileset)
                 console.log('DIRECTORY ADDED: ' + fileset);
                 sent(workflow, fileset);
-            } else {
-                console.log('SKIPPING MONGODB ' + fileset);
             }
         });
-
-
     }
 }
 
@@ -160,31 +158,33 @@ function addFile(workflow, filename, triggeredByFsWatcher) {
                     return element.length !== 0 && array.indexOf(element) === index;
                 })
                 .forEach(function (identifier) {
-                        let fileset = hotfolder + '/' + identifier;
-                        try {
-                            //
-                            fs.mkdirSync(fileset, {recursive: false});
-                            fs.chown(fileset, uid, uid, (error) => {
-                                if (error)
-                                    console.log("Error setting file: " + fileset + " - uid: " + uid + " - error: ", error);
-                            });
+                        if (identifier.charAt(0) !== '.') {
+                            let fileset = hotfolder + '/' + identifier;
+                            try {
+                                //
+                                fs.mkdirSync(fileset, {recursive: false});
+                                fs.chown(fileset, uid, uid, (error) => {
+                                    if (error)
+                                        console.log("Error setting file: " + fileset + " - uid: " + uid + " - error: ", error);
+                                });
 
-                            console.log('Fileset added: ' + fileset);
-                            console.log('DIT TRIGGERT GEEN FSWATCHER ALS FILE AANGEMAAKT IS WANNEER SERVICE DOWN WAS !!!')
+                                console.log('Fileset added: ' + fileset);
+                                console.log('DIT TRIGGERT GEEN FSWATCHER ALS FILE AANGEMAAKT IS WANNEER SERVICE DOWN WAS !!!')
 
-                            // vreemd probleem
-                            // indien proces draait en je maakt een lijst met records dan worden directories meteen aangemaakt
-                            // dat ziet fswatcher en er worden meteen records aangemaakt in mongodb
-                            // maar als je een lijst aanmaakt terwijl de service offline is, en daarna de service weer opstart
-                            // de service ziet wel een lijst, maakt nieuwe directories aan
-                            // maar de nieuwe directories triggeren geen fswatcher event (addDir)
-                            // oplossing: indien gevonden bij service start doe dan 'handmatig' de addDir (omdat fsWatcher het event niet ziet)
-                            if (!triggeredByFsWatcher) {
-                                console.log('START HIER ADD DIR: ' + fileset)
-                                addDir(workflow, fileset);
+                                // vreemd probleem
+                                // indien proces draait en je maakt een lijst met records dan worden directories meteen aangemaakt
+                                // dat ziet fswatcher en er worden meteen records aangemaakt in mongodb
+                                // maar als je een lijst aanmaakt terwijl de service offline is, en daarna de service weer opstart
+                                // de service ziet wel een lijst, maakt nieuwe directories aan
+                                // maar de nieuwe directories triggeren geen fswatcher event (addDir)
+                                // oplossing: indien gevonden bij service start doe dan 'handmatig' de addDir (omdat fsWatcher het event niet ziet)
+                                if (!triggeredByFsWatcher) {
+                                    console.log('START HIER ADD DIR: ' + fileset)
+                                    addDir(workflow, fileset);
+                                }
+                            } catch (err) {
+                                console.warn(err);
                             }
-                        } catch (err) {
-                            console.warn(err);
                         }
                     }
                 );

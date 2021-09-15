@@ -20,6 +20,7 @@ const ONE_SECOND = 1000; // one second is 1000 milliseconds
 const ONE_MINUTE = 60 * ONE_SECOND;
 const THREE_MINUTES = 3 * ONE_MINUTE;
 const ONE_HOUR = 60 * ONE_MINUTE;
+const FIVE_MINUTES = 5 * ONE_MINUTE;
 
 const Map = require('collections/map');
 const map = new Map();
@@ -139,7 +140,8 @@ router.post("/", (req, res) => {
                 environment: flow.environment,
                 delete_on_success: flow.delete_on_success || false
             });
-            tasks.forEach(function (task) {
+            tasks.forEach(function (_task) {
+                let task = Object.assign({}, _task);
                 task.order = ++order;
                 task.begin = new Date();
                 task.end = new Date();
@@ -268,15 +270,14 @@ function status(workflow) {
             let has_error = (workflow.task.status !== -450);
             workflow.status = -1;
             workflow.task.status = 499;
-            send_mail(workflow, 'Fail', has_error);
+            workflow.task.retry = (has_error) ? workflow.task.retry : 0;
             save(workflow);
+            send_mail(workflow, 'Fail', has_error);
             break;
-        case 499:
-            if (workflow.task.retryTime < 0) { // For hour no response yet
+        case 499: // retry  na vijf minuten.
+            if (workflow.task.retryTime < 0) {
                 console.log("Retry task: " + workflow.task.queue);
                 amq(workflow);
-            } else {
-                console.log("Failed task. Time before retry " + workflow.task.retryTime);
             }
             break;
         case 500:
@@ -344,7 +345,7 @@ router.put('/heartbeat', function (req, res) {
         }
     }
 
-    find({$or:[{status: 0}, {status: 1}]});
+    find({$or:[{status: -1}, {status: 0}, {status: 1}]});
 
     run_heartbeat = 0;
 

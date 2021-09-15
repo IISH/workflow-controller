@@ -65,7 +65,7 @@
   "workflows": {
     "helloworld": {
       "enable": true,
-      "delete_on_success": true,
+      "delete_on_success": false,
       "tasks": [
         {
           "description": "Say 'hello world 1'",
@@ -91,6 +91,5 @@
       "events": [
         "../workflow/Hotfolders/helloworld"
       ]
-    }
-  }
+    }}
 }

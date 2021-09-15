@@ -1,4 +1,4 @@
-const URL = 'archive/archive_inc';
+const URL = 'archive/archive_inc'; // used in utils.js
 
 function makeQuery() {
     let and_clause1 = []; // de popup van de workflow types
