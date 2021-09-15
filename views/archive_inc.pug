@@ -1,7 +1,7 @@
 each archive in archives || []
     tr(class='small')
         td
-            a(href='/report?form_report_name=' + archive.archive) #{archive.archive}
+            a(href='/history?form_archive_name=' + archive.archive) #{archive.archive}
         td #{archive.complete||0}
         td #{archive.running||0}
         td #{archive.waiting||0}

@@ -108,7 +108,7 @@ router.get('/check/:archive', function (req, res, next) {
                 console.log('Warn: no task with queue ' + queue + ' found in ' + workflow.identifier);
             }
         })
-    res.redirect('/report');
+    res.redirect('/history');
 });
 
 router.post('/check/:accession_id', function (req, res) {

@@ -52,8 +52,8 @@ app.use('/archive', archiveRouter);
 const pingRouter = require('./routes/ping');
 app.use('/ping', pingRouter);
 
-const reportRouter = require('./routes/report');
-app.use('/report', reportRouter);
+const historytRouter = require('./routes/history');
+app.use('/history', historytRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

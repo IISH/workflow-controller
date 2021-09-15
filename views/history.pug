@@ -7,14 +7,14 @@ block content
 
   include menu
 
-  form(method='GET' class='form-inline' id='form_report')
+  form(method='GET' class='form-inline' id='form_history')
 
-    input(type='hidden' id='form_report_name' name='form_report_name' value=form_report_name)
+    input(type='hidden' id='form_history_name' name='form_history_name' value=form_history_name)
 
     div(class='input-group')
-      label(for='form_report_status' class='form-check-label') Status
-      select(class='custom-select' id='form_report_status' name='form_report_status' onchange='this.form.submit()')
-        each status in report_status
+      label(for='form_history_status' class='form-check-label') Status
+      select(class='custom-select' id='form_history_status' name='form_history_status' onchange='this.form.submit()')
+        each status in history_status
           option #{status}
 
       label(for='form_workflow_item' class='form-check-label') Workflow types
@@ -37,4 +37,4 @@ block content
         //th(class='sortable' id='has_iiif') iiif
         th
     tbody(id='tbody')
-      include report_inc
+      include history_inc
