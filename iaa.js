@@ -54,6 +54,7 @@ module.exports = function (app, openid, users) {
                 });
                 userinfo.fullname = user.fullname || 'anonymous';
                 userinfo.authorized = Boolean(user);
+                userinfo.uid = user.uid;
                 return done(null, userinfo);
             }));
         }) // close off the .then()

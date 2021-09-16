@@ -6,6 +6,8 @@ each workflow in workflows || []
     tr(class='small')
         td= workflow.datetime
         td
+            a(href='/workflow?form_workflow_identifier=' + workflow.identifier) #{workflow.accession}
+        td
             img(src='images/' + icon width='25px' style='float: left;padding-right: 5px')
             = workflow.name
         td
@@ -16,10 +18,8 @@ each workflow in workflows || []
                 a(target='_blank' href=handle_url + '/' + workflow.accession + '?locatt=catalog') catalog
             else
                 |
-        td
-          a(href='/workflow?form_workflow_identifier=' + workflow.identifier) #{workflow.accession}
-        td= workflow.owner
         td #{{'-1': 'Error', 0: 'Waiting', 1: 'Running', 2: 'Complete'}[workflow.status]}
+        td= workflow.owner
         //td #{status[workflow.has_aip]}
         //td #{status[workflow.has_dip]}
         //td #{status[workflow.has_pid]}

@@ -4,6 +4,13 @@
  * Description
  * Workflow CRUD
  *
+ * Hier tonen we de taken per workflow
+ *
+ * Filter opties:
+ *  - geen = alle workflows (limit 100)
+ *  - een text keuze: ARCH12345 of ARCH12345.67
+ *  - een enkele workflow middels de identifier van de flow
+ *
  * @type {route}
  */
 

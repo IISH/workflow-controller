@@ -13,6 +13,7 @@
     "express-session": "^1.17.2",
     "chokidar": "3.3.0",
     "fs": "0.0.1-security",
+    "font-awesome": "^4.7.0",
     "http-errors": "^1.8.0",
     "nodemailer": "^6.6.3",
     "morgan": "^1.10.0",

@@ -9,32 +9,32 @@ block content
 
   form(method='GET' class='form-inline' id='form_history')
 
-    input(type='hidden' id='form_history_name' name='form_history_name' value=form_history_name)
-
-    div(class='input-group')
-      label(for='form_history_status' class='form-check-label') Status
-      select(class='custom-select' id='form_history_status' name='form_history_status' onchange='this.form.submit()')
-        each status in history_status
-          option #{status}
-
-      label(for='form_workflow_item' class='form-check-label') Workflow types
-        select(class='custom-select filter' id='form_workflow_item' name='form_workflow_item')
-          each item in form_workflow_list
-            option #{item}
-
-  table(class='table table-striped')
-    thead(class='thead-dark')
-      tr
+    table(class='table table-striped')
+      thead(class='thead-dark')
         th(class='sortable' id='datestamp') when
-        th(class='sortable' id='workflow') workflow
+        th(class='accession' id='accession') accession
         th//- icon
-        th(class='sortable' id='accession') accession
-        th(class='sortable' id='owner') owner
+        th(class='sortable' id='workflow') workflow
         th(class='sortable' id='status') status
-        //th(class='sortable' id='has_aip') aip
-        //th(class='sortable' id='has_dip') dip
-        //th(class='sortable' id='has_pid') pid
-        //th(class='sortable' id='has_iiif') iiif
+        th(class='sortable' id='owner') owner
         th
+      tr
+        td//- when
+        td
+            input(type='text' name='form_archive_name' id='form_archive_name' value=form_archive_name class='filter')
+        td(colspan='2') workflow
+          select(class='custom-select filter' id='form_workflow_name' name='form_workflow_name')
+            each item in form_workflow_list
+              option #{item}
+        td
+          each val,key in workflow_status
+              input(type='checkbox' name='filter_'+key id='filter_'+key value=val checked class='smaller filter')
+              =key
+              br
+        td
+            input(type='checkbox' name='filter_owner' id='filter_owner' value=uid class='smaller filter')
+            = 'self'
+        td//- button
+
     tbody(id='tbody')
       include history_inc

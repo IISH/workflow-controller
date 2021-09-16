@@ -2,9 +2,9 @@ const URL = 'archive/archive_inc'; // used in utils.js
 
 function makeQuery() {
     let and_clause1 = []; // de popup van de workflow types
-    let form_workflow_item = $('#form_workflow_item').val();
-    if (form_workflow_item) {
-        and_clause1.push({name: form_workflow_item});
+    let form_workflow_name = $('#form_workflow_name').val();
+    if (form_workflow_name) {
+        and_clause1.push({name: form_workflow_name});
     }
     if (and_clause1.length === 0) and_clause1.push({name: I});
 
@@ -32,6 +32,6 @@ function makeQuery() {
             return e
         })
     };
-    let d = {form_workflow_item: form_workflow_item, q: and_query, sort_field: sort_field, sort_order: sort_order};
+    let d = {q: and_query, sort_field: sort_field, sort_order: sort_order};
     return JSON.stringify(d);
 }

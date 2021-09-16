@@ -2,7 +2,16 @@
  * aggregate
  *
  * Description
- * Workflow CRUD
+ * archive CRUD
+ *
+ * Hier tonen we alle aangeboden archieven op de hoogste intellectuele eenheid.
+ * Dwz:
+ * ARCH12345.56 met twee workflows
+ * ARCH12345.78 met twee workflows
+ * wordt samengevoegd tot een record overzicht:
+ * ARCH12345 voor vier taken\
+ *
+ * De gebruiker kan deze intellectuele eenheid kiezen, waarna deze naar de route history  gaat.
  *
  * @type {route}
  */
@@ -13,21 +22,19 @@ const nconf = require('nconf');
 const Workflow = require('../model/workflow');
 const amq = require('../amq');
 
-const status = {'-1': 'failed', 0: 'waiting', 1: 'running', 2: 'complete'};
+const status = {failed: -1, waiting: 0, running: 1, complete: 2};
 
 router.get('/', function (req, res, next) {
-    let form_workflow_item = req.query.form_workflow_item;
     res.render('archive', {
         title: 'archive', theme: nconf.get('web').theme,
         form_workflow_list: [''].concat(Object.keys(nconf.get('workflows'))),
-        form_workflow_item: form_workflow_item,
         user: req.user.fullname
     })
 });
 
 router.post('/archive_inc', function (req, res, next) {
 
-    let form_workflow_item = req.body.form_workflow_item;
+    let form_workflow_name = req.body.form_workflow_name;
     let query = req.body.q || {};
 
     let sort_field = req.body.sort_field || 'archive';
@@ -68,7 +75,7 @@ router.post('/archive_inc', function (req, res, next) {
 
         res.render('archive_inc', {
             archives: _aggregate,
-            form_workflow_item: form_workflow_item,
+            form_workflow_name: form_workflow_name,
         });
     });
 });
