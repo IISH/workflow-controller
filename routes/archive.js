@@ -25,23 +25,22 @@ const amq = require('../amq');
 const status = {failed: -1, waiting: 0, running: 1, complete: 2};
 
 router.get('/', function (req, res, next) {
+
     res.render('archive', {
         title: 'archive', theme: nconf.get('web').theme,
-        form_workflow_list: [''].concat(Object.keys(nconf.get('workflows'))),
         user: req.user.fullname
     })
 });
 
 router.post('/archive_inc', function (req, res, next) {
 
-    let form_workflow_name = req.body.form_workflow_name;
     let query = req.body.q || {};
 
     let sort_field = req.body.sort_field || 'archive';
     let _sort_order = req.body.sort_order || 'asc';
     let sort_order = (_sort_order === 'asc' || _sort_order === '-1') ? -1 : 1;
 
-    // We want a table like:
+    // We want a table:
     // Archive | waiting | running | completed | failed | total
     // The datastructure is to be:
     // { archive: {waiting: a, failed: b, running: x, completed: y, total: z} }
@@ -75,7 +74,6 @@ router.post('/archive_inc', function (req, res, next) {
 
         res.render('archive_inc', {
             archives: _aggregate,
-            form_workflow_name: form_workflow_name,
         });
     });
 });
@@ -156,7 +154,7 @@ function check(i) {
 
 router.get('/delete/:archive', function (req, res, next) {
     let archive = req.archive;
-    Workflow.deleteMany({archive: archive}, function (err, rowsToDelete) {
+    Workflow.deleteMany({$or:[{identifier:archive}, {archive: archive}]}, function (err, rowsToDelete) {
         if (err) {
             console.error(err);
         } else {

@@ -1,13 +1,6 @@
-const URL = 'archive/archive_inc'; // used in utils.js
+const URL = 'archive/archive_inc'; // used in utils.js as is the identity function I
 
 function makeQuery() {
-    let and_clause1 = []; // de popup van de workflow types
-    let form_workflow_name = $('#form_workflow_name').val();
-    if (form_workflow_name) {
-        and_clause1.push({name: form_workflow_name});
-    }
-    if (and_clause1.length === 0) and_clause1.push({name: I});
-
     let and_clause2 = []; // de invoer naam van het accession nummer
     let archive = $('#filter_archive').val();
     if (archive) and_clause2.push({$or: [{archive: archive}, {archive: {$regex: '^.*' + archive + '.*$'}}]});
@@ -26,7 +19,7 @@ function makeQuery() {
         and_clause3.push({$or: or_clause3});
     }
 
-    let list = [and_clause1, and_clause2, and_clause3];
+    let list = [and_clause2, and_clause3];
     let and_query = {
         $and: list.flatMap(function (e) {
             return e

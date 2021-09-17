@@ -11,30 +11,34 @@ block content
 
     table(class='table table-striped')
       thead(class='thead-dark')
-        th(class='sortable' id='datestamp') when
-        th(class='accession' id='accession') accession
-        th//- icon
-        th(class='sortable' id='workflow') workflow
-        th(class='sortable' id='status') status
-        th(class='sortable' id='owner') owner
-        th
-      tr
-        td//- when
-        td
-            input(type='text' name='form_archive_name' id='form_archive_name' value=form_archive_name class='filter')
-        td(colspan='2') workflow
-          select(class='custom-select filter' id='form_workflow_name' name='form_workflow_name')
-            each item in form_workflow_list
-              option #{item}
-        td
-          each val,key in workflow_status
-              input(type='checkbox' name='filter_'+key id='filter_'+key value=val checked class='smaller filter')
-              =key
-              br
-        td
-            input(type='checkbox' name='filter_owner' id='filter_owner' value=uid class='smaller filter')
-            = 'self'
-        td//- button
+        tr
+          th(class='sortable' id='begin') when
+          th(class='sortable' id='accession') accession
+          th(class='sortable' id='name' colspan='2') workflow
+          th(class='sortable' id='status') status
+          th(class='sortable' id='owner') owner
+          th//- imagery
+          th//- buttons
+        tr(class='checkboxes')
+          td//- when
+          td
+              input(type='text' name='form_archive_name' id='form_archive_name' value=form_archive_name class='filter')
+          td(colspan='2') workflow
+            select(class='custom-select filter' id='form_workflow_name' name='form_workflow_name')
+              each item in form_workflow_list
+                option #{item}
+          td
+            each val,key in workflow_status
+                input(type='checkbox' name='status_'+key id='status_'+key value=val checked class='smaller filter filter_status')
+                =key
+                -
+          td
+            select(class='custom-select filter_user' id='form_user' name='form_user')
+              option
+              each user in form_user_list
+                option(value=user.uid) #{user.fullname}
+          td//- imagery
+          td//- button
 
-    tbody(id='tbody')
-      include history_inc
+      tbody(id='tbody')
+        include history_inc

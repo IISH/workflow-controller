@@ -9,30 +9,31 @@ block content
 
   form(method='GET' class='form-inline' id='form_workflow')
 
-    input(type='hidden' id='form_workflow_identifier' name='form_workflow_identifier' value=form_workflow_identifier)
+    input(type='hidden' name='workflow_identifier' id='workflow_identifier' value=workflow.identifier)
 
-    div(class='input-group')
-      label(for='form_workflow_name' class='form-check-label') Workflow types
-      select(class='custom-select' id='form_workflow_name' name='form_workflow_name' onchange='this.form.submit()')
-        each name in workflow_name
-          if name === form_workflow_name
-            option(selected='true') #{name}
-          else
-            option #{name}
-      label(for='form_workflow_status' class='form-check-label') Status
-      select(class='custom-select' id='form_workflow_status' name='form_workflow_status' onchange='this.form.submit()')
-        each name in workflow_status
-          if name === form_workflow_status
-            option(selected='true') #{name}
-          else
-            option #{name}
+  table(class='table table-bordered')
+    tr
+      td//- button
+      th fileset
+      th date
+      th workflow
+      th completed
+    tr
+      td
+        a(href='archive/delete/' + workflow.identifier class='btn btn-info delete_row' role='button') Delete
+      td
+        a(href='workflow/' + workflow.identifier)= workflow.fileset
+      td= workflow.datetime
+      td= workflow.name
+      td= workflow.complete
+      //td= {'-1': 'Error', 0: 'Waiting', 1: 'Running', 2: 'Complete'}[workflow.status]
+
   table(class='table table-striped')
     thead(class='thead-dark')
       tr
-        th
-        th(class='sortable' id='name') flow
-        th(class='sortable' id='fileset') fileset
-        th(class='sortable' colspan='1' id='owner') owner
-        th task
+        th queue
+        th status
+        th//- button
+        th info
     tbody(id='tbody')
-      include workflow_inc
+        include workflow_inc

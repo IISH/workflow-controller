@@ -29,6 +29,7 @@ router.get('/', function (req, res, next) {
     res.render('history', {
         title: 'history', theme: nconf.get('web').theme,
         form_workflow_list: [''].concat(Object.keys(nconf.get('workflows'))),
+        form_user_list: nconf.get('users'),
         form_workflow_name: form_workflow_name,
         workflow_status: workflow_status,
         user: req.user.fullname,
@@ -46,10 +47,13 @@ router.post('/history_inc', function (req, res, next) {
     let sort = {};
     sort[sort_field] = (_sort_order === 'asc' || _sort_order === '-1') ? -1 : 1;
 
+    let archive_or_accession = req.body.archive_or_accession;
+
     Workflow.find(query, function (err, workflows) {
         if (err) return next(err);
         res.render('history_inc', {
             workflows: workflows,
+            archive_or_accession: archive_or_accession,
             iiif_url: nconf.get('web').iiif_url,
             handle_url: nconf.get('web').handle_url
         })

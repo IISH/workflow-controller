@@ -8,13 +8,23 @@ function utils() {
     });
 
     $('.filter').change(function(){
-        tbody();
+        tbody('Loading...');
     });
 }
 
-function tbody() {
+let overload = 0;
+function tbody(load_text) {
 
+    let now = new Date();
+    if ( overload && overload - now < 500) { // ms
+        overload = now;
+        console.log('Ignore, too many clicks');
+        return;
+    }
+
+    if (load_text) $('#tbody').html(load_text);
     let data = makeQuery();
+    console.log(data);
 
     $.ajax({
         url: URL,

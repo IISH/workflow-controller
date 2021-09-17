@@ -1,15 +1,28 @@
 //https://www.w3schools.com/icons/icons_reference.asp
-- const icons={archivematica:'archivematica.png',helloworld:'helloworld.jpg'}
+- const icons={ead2archivesspace:'ead2archivesspace.png', archivematica:'archivematica.png', backup:'backup.svg',helloworld:'helloworld.jpg', order:'order.svg', recovery:'recovery.svg'}
 
 each workflow in workflows || []
     - let icon=icons[workflow.name] || workflow.name + '.svg'
     tr(class='small')
         td= workflow.datetime
         td
-            a(href='/workflow?form_workflow_identifier=' + workflow.identifier) #{workflow.accession}
+            if workflow.accession === archive_or_accession
+                =workflow.accession
+            else
+                a(href='?form_archive_name=' + workflow.accession) #{workflow.accession}
         td
             img(src='images/' + icon width='25px' style='float: left;padding-right: 5px')
-            = workflow.name
+            a(href='workflow?identifier=' + workflow.identifier)= workflow.name
+        td
+        td(class= 'small ' + {
+            '-1': 'bg-danger',
+            '0': '',
+            '1': '',
+            '2': 'bg-success'
+        }[workflow.status])= {'-1': 'Error', 0: 'Waiting', 1: 'Running', 2: 'Complete'}[workflow.status]
+        td
+            a(href='?uid=' + workflow.uid)= workflow.owner
+
         td
             if workflow.has_dip && workflow.name in ['order', 'download_aip', 'download_dip'] || workflow.has_dip && workflow.name === 'archivematica' && workflow.status === 2
                 a(target='_blank' href=iiif_url + '/#?manifest=' + handle_url + '/' + workflow.accession + '?locatt=view:manifest')
@@ -18,14 +31,6 @@ each workflow in workflows || []
                 a(target='_blank' href=handle_url + '/' + workflow.accession + '?locatt=catalog') catalog
             else
                 |
-        td #{{'-1': 'Error', 0: 'Waiting', 1: 'Running', 2: 'Complete'}[workflow.status]}
-        td= workflow.owner
-        //td #{status[workflow.has_aip]}
-        //td #{status[workflow.has_dip]}
-        //td #{status[workflow.has_pid]}
-        //td
-        //  #{status[workflow.has_iiif]} |
-        //  a(target='_blank' href=iiif_url + '/universalviewer/#?manifest=' + handle_url + '/' + workflow.accession + '?locatt=view:manifest') iiif
-        //  a(target='_blank' href=handle_url + '/' + workflow.accession + '?locatt=view:catalog') catalog
+
         td
-            a(href='history/delete/' + workflow.identifier class='btn btn-info delete_row' role='button') Delete
+            a(href='archive/delete/' + workflow.identifier class='btn btn-info delete_row' role='button') Delete

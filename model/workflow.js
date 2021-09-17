@@ -182,8 +182,7 @@ workflowSchema.virtual('stuck').get(function () {
  * duration = time of the task
  */
 workflowSchema.virtual('duration').get(function () {
-    const seconds = 1000;
-    return Math.floor(Math.abs((this.end - this.begin) / seconds));
+    return Math.floor(Math.abs((this.end - this.begin) / SECOND));
 });
 
 

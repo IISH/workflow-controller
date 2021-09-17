@@ -13,7 +13,6 @@ block content
       thead(class='thead-dark')
         tr
           th(class='sortable' id='archive') piece\archive
-          th(class='sortable' id='workflow') workflow
           th(class='sortable' id='complete') complete
           th(class='sortable' id='running') running
           th(class='sortable' id='waiting') waiting
@@ -23,10 +22,6 @@ block content
         tr(class='checkboxes')
           td
             input(type='text' name='archive' id='filter_archive' class='filter')
-          td
-            select(class='custom-select filter' id='form_workflow_name' name='form_workflow_name')
-              each item in form_workflow_list
-                option #{item}
           td
             input(type='checkbox' name='complete' id='status_complete' value='2' checked class='filter')
           td

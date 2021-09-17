@@ -1,38 +1,24 @@
-each workflow in workflows || []
+each task in workflow.tasks || []
     tr
-        td #{workflow.name}
-            ul(class='opties')
-                a(href='workflow/delete/' + workflow.identifier class='small' role='button') Delete
+        td(scope='col' class='small')= task.queue + ':'
+            br
+            =task.description
+            br
+            br
+            a(href='workflow/retry/' + task.identifier + '?form_workflow_name=' + form_workflow_name class='btn btn-info small' role='button') Retry
+            a(href='workflow/skip/' + task.identifier + '?form_workflow_name=' + form_workflow_name class='btn btn-info small' role='button') Skip
+        td(scope='col' class='small ' + {
+            100: '',
+            150: 'bg-warning',
+            200: '',
+            250: 'bg-warning',
+            300: '',
+            400: 'bg-danger',
+            450: 'bg-danger',
+            499: 'bg-danger',
+            500: 'bg-success',
+            600: 'bg-success'
+        }[task.status]) #{task.status}
         td
-            a(href='workflow/' + workflow.identifier) #{workflow.filesetshort}
-        td(scope='col') #{workflow.owner}
-        td
-            table
-                // each task in workflow.tasks.sort((a, b) => a.order > b.order)
-                each task in workflow.tasks
-                    tr
-                        td(scope='col') #{task.queue}
-                            ul(class='opties')
-                                li
-                                    a(href='workflow/retry/' + task.identifier + '?form_workflow_name=' + form_workflow_name class='small' role='button') Retry (#{task.retryTime})
-                                li
-                                    a(href='workflow/skip/' + task.identifier + '?form_workflow_name=' + form_workflow_name class='small' role='button') Skip
-                        td(scope='col' class='wordwrap')
-                            pre #{task.description}
-                        td(scope='col' class={
-                            100: '',
-                            150: 'bg-warning',
-                            200: '',
-                            250: 'bg-warning',
-                            300: '',
-                            400: 'bg-danger',
-                            450: 'bg-danger',
-                            499: 'bg-danger',
-                            500: 'bg-success',
-                            600: 'bg-success'
-                        }[task.status]) #{task.status}
-                        td(scope='col')
-                            pre #{task.info}
-                        td(scope='col' class='small') #{task.startdate}T#{task.starttime} #{task.enddate}T#{task.endtime}
-                    tr
-                        td(scope='col' colspan='5')
+        td(scope='col' class='small')
+            pre= task.info

@@ -25,76 +25,16 @@ const fs = require('fs');
 
 const ONE_SECOND = 1000; // one second is 1000 milliseconds
 const ONE_MINUTE = 60 * ONE_SECOND;
-const THREE_MINUTES = 3 * ONE_MINUTE;
 const ONE_HOUR = 60 * ONE_MINUTE;
-const FIVE_MINUTES = 5 * ONE_MINUTE;
 
 const Map = require('collections/map');
 const map = new Map();
-
-router.get('/', function (req, res, next) {
-    let form_workflow_identifier = req.query.form_workflow_identifier;
-    let form_workflow_name = req.query.form_workflow_name;
-    let form_workflow_status = req.query.form_workflow_status;
-    res.render('workflow', {
-        title: 'workflow', theme: nconf.get('web').theme,
-        user: req.user.fullname,
-        workflow_name: [''].concat(Object.keys(nconf.get('workflows'))),
-        workflow_status: [''].concat(['Waiting', 'Running', 'Failed', 'Complete']),
-        form_workflow_name: form_workflow_name,
-        form_workflow_status: form_workflow_status,
-        form_workflow_identifier: form_workflow_identifier
-    })
-});
-
-router.get('/workflow_inc', function (req, res, next) {
-    let limit = req.params.limit || 1000;
-    let form_workflow_identifier = req.query.form_workflow_identifier;
-    let form_workflow_name = req.query.form_workflow_name;
-    let form_workflow_status = req.query.form_workflow_status;
-    let sort = req.query.sort || 'date';
-    let query = (form_workflow_name) ? {name: form_workflow_name} : {};
-    if (form_workflow_identifier) {
-        query.identifier = form_workflow_identifier;
-    }
-
-    switch (form_workflow_status) {
-        case 'Waiting':
-            query['tasks.0.status'] = 200;
-            break;
-        case 'Running':
-            query['tasks.0.status'] = 350;
-            break;
-        case 'Failed':
-            query['tasks.0.status'] = 499;
-            break;
-        case 'Complete':
-            query['tasks.0.status'] = 600;
-            break;
-        case '':
-        case null:
-        case undefined:
-            break;
-        default:
-            console.log("Unknown status: " + form_workflow_status)
-            break;
-    }
-
-    Workflow.find(query, function (err, workflows) {
-        if (err) return next(err);
-        res.render('workflow_inc', {
-            workflows: workflows,
-            form_workflow_name: form_workflow_name,
-            form_workflow_status: form_workflow_status,
-            form_workflow_identifier: form_workflow_identifier
-        })
-    }).sort(sort).limit(limit);
-});
 
 router.param('identifier', function (req, res, next, identifier) {
     res.setHeader('Content-Type', 'application/json');
     Workflow.findOne({$or: [{'identifier': identifier}, {'tasks.identifier': identifier}]}, function (err, workflow) {
         if (err) {
+            log.error(err);
             res.status(500);
             res.end(JSON.stringify({status: 500, message: 'Failed to load fileset ' + identifier + ' ' + err}));
         } else if (workflow) {
@@ -103,6 +43,43 @@ router.param('identifier', function (req, res, next, identifier) {
         } else {
             res.status(404);
             res.end(JSON.stringify({status: 404, message: 'No task found with identifier ' + identifier}));
+        }
+    });
+});
+
+router.get('/', function (req, res, next) {
+    let identifier = req.query.identifier;
+    Workflow.findOne({$or: [{'identifier': identifier}, {'tasks.identifier': identifier}]}, function (err, workflow) {
+        if (err) {
+            log.error(err);
+            res.status(500);
+        } else if (workflow) {
+            res.render('workflow', {
+                title: 'workflow', theme: nconf.get('web').theme,
+                user: req.user.fullname,
+                workflow_status: [''].concat(['Waiting', 'Running', 'Failed', 'Complete']),
+                workflow: workflow
+            })
+        }    else {
+            res.status(404);
+            res.end('No task found with identifier ' + identifier);
+        }
+    });
+});
+
+router.post('/workflow_inc', function (req, res, next) {
+    let q = req.body.q;
+    Workflow.findOne(q, function (err, workflow) {
+        if (err) {
+            log.error(err);
+            res.status(500);
+        } else if (workflow) {
+            res.render('workflow_inc', {
+                workflow: workflow
+            })
+        }    else {
+            res.status(404);
+            res.end('No task found with identifier ' + identifier);
         }
     });
 });
@@ -331,7 +308,7 @@ let run_heartbeat = 0;
 router.put('/heartbeat', function (req, res) {
     res.setHeader('Content-Type', 'application/json');
 
-    if (run_heartbeat++ > 1 && run_heartbeat< 10) {
+    if (run_heartbeat++ > 1 && run_heartbeat < 10) {
         res.status(200);
         res.end(JSON.stringify({
             status: 200,
@@ -353,7 +330,7 @@ router.put('/heartbeat', function (req, res) {
         }
     }
 
-    find({$or:[{status: -1}, {status: 0}, {status: 1}]});
+    find({$or: [{status: -1}, {status: 0}, {status: 1}]});
 
     run_heartbeat = 0;
 
