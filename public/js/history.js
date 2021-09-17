@@ -10,7 +10,7 @@ function makeQuery() {
 
     let and_clause2 = []; // de invoer naam van het accession nummer
     let archive_or_accession = $('#form_archive_name').val();
-    if (archive_or_accession) and_clause2.push({$or: [{archive: archive_or_accession}, {accession: {$regex: '^.*' + archive_or_accession + '.*$'}}]});
+    if (archive_or_accession) and_clause2.push({$or: [{archive: archive_or_accession}, {accession: {$regex: '^.*' + archive_or_accession + '.*$', $options: 'i'}}]});
     if (and_clause2.length === 0) and_clause2.push({archive: I});
 
     let and_clause3 = []; // de status

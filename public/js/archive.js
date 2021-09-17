@@ -3,7 +3,7 @@ const URL = 'archive/archive_inc'; // used in utils.js as is the identity functi
 function makeQuery() {
     let and_clause2 = []; // de invoer naam van het accession nummer
     let archive = $('#filter_archive').val();
-    if (archive) and_clause2.push({$or: [{archive: archive}, {archive: {$regex: '^.*' + archive + '.*$'}}]});
+    if (archive) and_clause2.push({$or: [{archive: archive}, {archive: {$regex: '^.*' + archive + '.*$', $options: 'i'}}]});
     if (and_clause2.length === 0) and_clause2.push({archive: I});
 
     let and_clause3 = []; // de status

@@ -22,7 +22,8 @@ const nconf = require('nconf');
 const Workflow = require('../model/workflow');
 const amq = require('../amq');
 
-const status = {failed: -1, waiting: 0, running: 1, complete: 2};
+const status = {'-1': 'failed', 0: 'waiting', 1: 'running', 2: 'complete'};
+// const status = {failed: -1, waiting: 0, running: 1, complete: 2};
 
 router.get('/', function (req, res, next) {
 
