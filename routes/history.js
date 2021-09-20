@@ -23,18 +23,44 @@ const Workflow = require('../model/workflow');
 
 const workflow_status = {failed: -1, waiting: 0, running: 1, complete: 2};
 
+function listWorkflow() {
+    return new Promise(resolve => {
+        Workflow.aggregate([{
+            $match: {}
+        }, {
+            $group: {
+                _id: '$name'
+            }
+        },
+        ], function (err, aggregate) {
+            if (err) return next(err);
+            return resolve(aggregate.group(a => a._id).map(function (d) {
+                return d[0];
+            }).sort((a, b) => {
+                if (a < b) return -1;
+                if (a > b) return 1;
+                return 0;
+            }));
+        })
+    })
+}
+
 router.get('/', function (req, res, next) {
     let form_workflow_name = req.query.form_workflow_name;
     let form_archive_name = req.query.form_archive_name;
-    res.render('history', {
-        title: 'history', theme: nconf.get('web').theme,
-        form_workflow_list: [''].concat(Object.keys(nconf.get('workflows'))),
-        form_user_list: nconf.get('users'),
-        form_workflow_name: form_workflow_name,
-        workflow_status: workflow_status,
-        user: req.user.fullname,
-        uid: req.user.uid || 1000,
-        form_archive_name: form_archive_name
+
+    listWorkflow().then(function(form_workflow_list, err) {
+        if (err) form_workflow_list = [];
+        res.render('history', {
+            title: 'history', theme: nconf.get('web').theme,
+            form_workflow_list: form_workflow_list,
+            form_user_list: nconf.get('users'),
+            form_workflow_name: form_workflow_name,
+            workflow_status: workflow_status,
+            user: req.user.fullname,
+            uid: req.user.uid || 1000,
+            form_archive_name: form_archive_name
+        })
     });
 });
 

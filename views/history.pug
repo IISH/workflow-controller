@@ -25,8 +25,9 @@ block content
               input(type='text' name='form_archive_name' id='form_archive_name' value=form_archive_name class='filter')
           td(colspan='2') workflow
             select(class='custom-select filter' id='form_workflow_name' name='form_workflow_name')
-              each item in form_workflow_list
-                option #{item}
+              option//- lege optie
+              each name in form_workflow_list
+                option #{name}
           td
             each val,key in workflow_status
                 input(type='checkbox' name='status_'+key id='status_'+key value=val checked class='smaller filter filter_status')
@@ -34,7 +35,7 @@ block content
                 -
           td
             select(class='custom-select filter_user' id='form_user' name='form_user')
-              option
+              option//- lege optie
               each user in form_user_list
                 option(value=user.uid) #{user.fullname}
           td//- imagery

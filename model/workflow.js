@@ -40,8 +40,6 @@ const nconf = require('nconf');
 
 const SECOND = 1000;
 const ONE_MINUTE = 60 * SECOND;
-const FIVE_MINUTES = 5 * ONE_MINUTE;
-const ONE_HOUR = 60 * ONE_MINUTE;
 
 /**
  * Task is a child of Workflow
@@ -59,22 +57,6 @@ let taskSchema = new dao.Schema({
     order: Number,
     retry: {type: Number, default: ONE_MINUTE}
 }, { _id: false });
-
-/**
- * duration = time of the task
- */
-taskSchema.virtual('duration').get(function () {
-    if (this.status === 100) {
-        return '';
-    }
-    let now = (this.status < 400 || this.status >= 500) ? new Date() : this.end;
-    let seconds = Math.floor(Math.abs((now - this.begin) / SECOND));
-    let hours = Math.floor(seconds / 3600);
-    seconds = seconds - hours * 3600;
-    let minutes = Math.floor(seconds / 60);
-    seconds = seconds - minutes * 60;
-    return ('00' + hours).substr(-2) + ':' + ('00' + minutes).substr(-2) + ':' + ('00' + seconds).substr(-2);
-});
 
 /**
  * retryTime = time to retry a failed task
@@ -168,24 +150,6 @@ workflowSchema.virtual('complete').get(function () {
         return task.status < 500 ;
     }).length === 0;
 });
-
-/**
- * Is the workflow stuck or hanging on something?
- */
-workflowSchema.virtual('stuck').get(function () {
-    return this.tasks.filter( function(task) {
-        return task.status >= 400 && task.status < 500 ;
-    }).length !== 0;
-});
-
-/**
- * duration = time of the task
- */
-workflowSchema.virtual('duration').get(function () {
-    return Math.floor(Math.abs((this.end - this.begin) / SECOND));
-});
-
-
 
 /**
  * task = current task is the first in the list
