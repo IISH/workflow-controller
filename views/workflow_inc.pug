@@ -5,8 +5,8 @@ each task in workflow.tasks || []
             =task.description
             br
             br
-            a(href='workflow/retry/' + task.identifier + '?form_workflow_name=' + form_workflow_name class='btn btn-info small' role='button') Retry
-            a(href='workflow/skip/' + task.identifier + '?form_workflow_name=' + form_workflow_name class='btn btn-info small' role='button') Skip
+            a(href='workflow/retry/' + task.identifier class='btn btn-info small' role='button') Retry
+            a(href='workflow/skip/' + task.identifier class='btn btn-info small' role='button') Skip
         td(scope='col' class='small ' + {
             100: '',
             150: 'bg-warning',

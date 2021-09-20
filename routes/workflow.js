@@ -169,23 +169,21 @@ router.get('/retry/:identifier', function (req, res, next) {
     workflow.task.info = 'Retrying...';
     amq(workflow);
 
-    let form_workflow_name = parse(req.query.form_workflow_name);
-    res.redirect('/workflow?form_workflow_name=' + form_workflow_name);
+    res.redirect('/workflow?identifier=' + workflow.identifier);
 });
 
 router.get('/skip/:identifier', function (req, res, next) {
     let workflow = req.workflow;
     workflow.task.status = 500;
     status(workflow);
-    let form_workflow_name = parse(req.query.form_workflow_name);
-    res.redirect('/workflow?form_workflow_name=' + form_workflow_name);
+    res.redirect('/workflow?identifier=' + workflow.identifier);
 });
 
 router.get('/delete/:identifier', function (req, res, next) {
     let workflow = req.workflow;
+    let form_archive_name = workflow.archive;
     workflow.delete();
-    let form_workflow_name = parse(req.query.form_workflow_name);
-    res.redirect('/workflow?form_workflow_name=' + form_workflow_name);
+    res.redirect('/history?form_archive_name=' + form_archive_name);
 });
 
 function parse(_text) {
