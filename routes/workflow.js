@@ -79,7 +79,7 @@ router.post('/workflow_inc', function (req, res, next) {
             })
         }    else {
             res.status(404);
-            res.end('No task found with identifier ' + identifier);
+            res.end('No task found with ' + JSON.stringify(q));
         }
     });
 });
