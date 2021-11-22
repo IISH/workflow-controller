@@ -44,11 +44,13 @@ const reloadHotfolder = function () {
                                 console.log(err);
                             } else {
                                 files.forEach(file => {
-                                    if (file.charAt(0) !== '.') {
-                                        if (fs.lstatSync(hotfolder + '/' + file).isDirectory()) {
-                                            addDir(workflow, hotfolder + '/' + file);
-                                        } else {
-                                            addFile(workflow, hotfolder + '/' + file, false);
+                                    if (!systemfile.includes(file.toLowerCase())) {
+                                        if (file.charAt(0) !== '.') {
+                                            if (fs.lstatSync(hotfolder + '/' + file).isDirectory()) {
+                                                addDir(workflow, hotfolder + '/' + file);
+                                            } else {
+                                                addFile(workflow, hotfolder + '/' + file, false);
+                                            }
                                         }
                                     }
                                 })
