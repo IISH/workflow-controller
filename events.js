@@ -21,6 +21,7 @@ const url = nconf.get('web').endpoint + '/workflow';
 const extension = ['.txt', '.csv'];
 const systemfile = ['new folder', 'tmp', 'temp', 'work'];
 const Workflow = require('./model/workflow');
+const TEN_MINUTES = 10 * 1000 * 60 ;
 
 const workflows = nconf.get('workflows');
 
@@ -86,7 +87,7 @@ for (let workflow in workflows) {
                     remove(fileset);
                 })
                 .on('addDir', (fileset) => {
-                    addDir(workflow, fileset);
+                    addDir(workflow, fileset, true);
                 })
                 .on('add', (filename) => {
                     addFile(workflow, filename, true);
@@ -124,18 +125,27 @@ function remove(fileset) {
     console.log("workflow removal not implemented: " + fileset);
 }
 
-function addDir(workflow, fileset) {
+function addDir(workflow, fileset, hot) {
+    let b = (typeof hot !== 'undefined') ? hot : false;
     let accession = path.basename(fileset);
     if (!systemfile.includes(accession.toLowerCase())) {
-        Workflow.findOne({'fileset': fileset}, function (err, resWorkflow) {
-            if (err) {
-                console.log('MONGODB fileset: ' + fileset + ' ERROR: ' + err)
-            } else if (!resWorkflow) {
-                console.log('MONGODB RECORD NOT FOUND ' + fileset)
-                console.log('DIRECTORY ADDED: ' + fileset);
-                sent(workflow, fileset);
-            }
-        });
+        if (b) {
+            sent(workflow, fileset)
+        } else {
+            let cooldown_period = new Date(new Date().getTime() - TEN_MINUTES);
+            // Workflow.findOne({'fileset': fileset, end: {$gt: cooldown_period}}, function (err, resWorkflow) {
+            Workflow.findOne({'fileset': fileset}, function (err, resWorkflow) {
+                if (err) {
+                    console.error('MONGODB fileset: ' + fileset + ' ERROR: ' + err)
+                } else if (resWorkflow) {
+                    console.log('Ignore existing database document ' + fileset)
+                } else {
+                    console.log('MONGODB RECORD NOT FOUND ' + fileset)
+                    console.log('DIRECTORY ADDED: ' + fileset);
+                    sent(workflow, fileset);
+                }
+            });
+        }
     }
 }
 

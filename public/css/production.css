@@ -62,3 +62,9 @@ tr.checkboxes {
     background-color: gray;
     height: 5px;
 }
+
+.clickbox {
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: blue;
+}

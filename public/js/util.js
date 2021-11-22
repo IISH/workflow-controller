@@ -3,10 +3,6 @@ let sort_field = '';
 let sort_order = 1;
 
 function utils() {
-    $('.delete_row').click(function(){
-        return confirm("Are you sure you want to delete?");
-    });
-
     $('.filter').change(function(){
         tbody('Loading...');
     });
