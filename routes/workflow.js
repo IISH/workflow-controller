@@ -343,8 +343,8 @@ router.post('/queue/:identifier', function (req, res) {
         workflow.task.status = task_agent.status;
         workflow.task.end = new Date();
         workflow.task.info = task_agent.info;
-        workflow.task.agent = req.headers['Agent-Hostname'];
-        workflow.task.pipeline = req.headers['Agent-Pipeline'];
+        workflow.task.agent = req.headers['agent-hostname'];
+        workflow.task.pipeline = req.headers['agent-pipeline'];
         status(workflow);
         res.status(200);
         res.end(JSON.stringify({status: 200, message: 'OK'}));

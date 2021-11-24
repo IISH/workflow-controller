@@ -55,7 +55,9 @@ let taskSchema = new dao.Schema({
     info: {type: String, default: 'Waiting its turn'},
     description: String,
     order: Number,
-    retry: {type: Number, default: ONE_MINUTE}
+    retry: {type: Number, default: ONE_MINUTE},
+    agent: String,
+    pipeline: String
 }, { _id: false });
 
 /**
@@ -66,8 +68,6 @@ taskSchema.virtual('retryTime').get(function(){
     let seconds_end = now - this.end;
     return (this.retry) ? this.retry - seconds_end : 0;
 });
-
-
 function formatDate(date) {
     let year = date.getFullYear();
     let month = ('00' + (date.getUTCMonth() + 1)).substr(-2);
