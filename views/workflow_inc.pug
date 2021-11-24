@@ -7,6 +7,12 @@ each task in workflow.tasks || []
             br
             a(href='workflow/retry/' + task.identifier class='btn btn-info small' role='button') Retry
             a(href='workflow/skip/' + task.identifier class='btn btn-info small' role='button') Skip
+            br
+            br
+            Agent #{task.agent}
+            if task.queue === 'archivematica'
+                a(href='http://' + task.pipeline + '8000' target='_blank') Pipeline #{task.pipeline}
+
         td(scope='col' class='small ' + {
             100: '',
             150: 'bg-warning',
@@ -19,6 +25,5 @@ each task in workflow.tasks || []
             500: 'bg-success',
             600: 'bg-success'
         }[task.status]) #{task.status}
-        td
         td(scope='col' class='small')
             pre= task.info

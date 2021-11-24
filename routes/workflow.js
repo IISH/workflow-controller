@@ -257,7 +257,7 @@ function status(workflow) {
             save(workflow);
             send_mail(workflow, 'Fail', has_error);
             break;
-        case 499: // retry  na vijf minuten.
+        case 499: // retry
             if (workflow.task.retryTime < 0) {
                 console.log("Retry task: " + workflow.task.queue);
                 amq(workflow);
@@ -343,6 +343,8 @@ router.post('/queue/:identifier', function (req, res) {
         workflow.task.status = task_agent.status;
         workflow.task.end = new Date();
         workflow.task.info = task_agent.info;
+        workflow.task.agent = req.headers['Agent-Hostname'];
+        workflow.task.pipeline = req.headers['Agent-Pipeline'];
         status(workflow);
         res.status(200);
         res.end(JSON.stringify({status: 200, message: 'OK'}));
