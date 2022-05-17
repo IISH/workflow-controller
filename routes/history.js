@@ -81,7 +81,8 @@ router.post('/history_inc', function (req, res, next) {
             workflows: workflows,
             archive_or_accession: archive_or_accession,
             iiif_url: nconf.get('web').iiif_url,
-            handle_url: nconf.get('web').handle_url
+            handle_url: nconf.get('web').handle_url,
+            iiif_thumbnail: nconf.get('web').iiif_thumbnail
         })
     }).sort(sort).limit(limit);
 });
