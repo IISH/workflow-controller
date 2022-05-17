@@ -24,7 +24,7 @@ each workflow in workflows || []
         td
             if workflow.has_dip && workflow.name in ['order', 'download_aip', 'download_dip'] || workflow.has_dip && workflow.name === 'archivematica' && workflow.status === 2
                 a(target='_blank' href=iiif_url + '/#?manifest=' + handle_url + '/' + workflow.accession + '?locatt=view:manifest')
-                    img(style='height: 100px;width: 100px' src=handle_url + '/' + workflow.accession + '?locatt=view:level3')
+                    img(src=iiif_thumbnail + '/' + workflow.accession + '/full/200,/0/default.jpg')
                 br
                 a(target='_blank' href=handle_url + '/' + workflow.accession + '?locatt=catalog') catalog
             else

@@ -279,7 +279,7 @@ function status(workflow) {
                     workflow.delete();
                     fs.rmdir(fileset, {recursive: false, force: false}, (err) => {
                         if (err) {
-                            // it may fail.
+                            console.error(err); // it is allowed to fail.
                         } else {
                             console.log(`${fileset} folder is deleted.`);
                         }
