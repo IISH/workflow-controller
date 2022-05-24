@@ -9,7 +9,7 @@ module.exports = function(workflow) {
     }
 
     let amq = nconf.get('amq');
-    let url = amq.protocol + '://' + amq.host + ':' + amq.port + '/api/message/' + workflow.task.queue + '?type=' + workflow.task.type;
+    let url = amq.protocol + '://' + amq.host + ':' + amq.port + '/api/message/' + amq.username + '_' + workflow.task.queue + '?type=' + workflow.task.type;
     workflow.task.identifier = Workflow.identifier();
     let form = {body: workflow.task.identifier};
     console.log('amq ' + url + ' ' + form);
