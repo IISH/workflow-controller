@@ -1,5 +1,5 @@
 FROM node:alpine3.11
-LABEL Description="Workflow controller" Version="v1.1.5"
+LABEL Description="Workflow controller" Version="v1.1.6"
 
 COPY . /home/node
 
